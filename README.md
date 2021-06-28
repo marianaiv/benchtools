@@ -4,7 +4,7 @@ Este proyecto es parte de la [Tesis de grado](https://github.com/marianaiv/tesis
 
 En este repositorio se encuentran herramientas para: 
 - Pre-procesamiento y análisis de datos
-- Clasificación de algoritmos bajo algunas métricas
+- Clasificación de algoritmos de clasificación bajo algunas métricas
 
 ## Contenido del repositorio
 **Por definir**
