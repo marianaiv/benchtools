@@ -34,8 +34,8 @@ batch_idx = 0
 
 for batch in fb:
     # Definimos un dataframe para guardar las variables 
-    df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1',  
-                            'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2',
+    df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrones_j1',
+                            'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrones_j2',
                             'm_jj', 'deltaR_j12','n_hadrones', 'label'])
     if batch_idx < flags.nbatch:
         print('Parte {}/{}'.format(batch_idx+1, flags.nbatch))
