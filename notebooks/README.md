@@ -4,5 +4,5 @@ Este es el archivo README para el subdirectorio de Notebooks. Para el archivo RE
 
 En este subdirectorio se encuentran los notebooks donde:
 
-- Se pre-procesan datos
+- Se prueba el pre-procesamiento datos
 - Se prueban distintos algoritmos de clasificación
