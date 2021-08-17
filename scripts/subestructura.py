@@ -55,7 +55,7 @@ def tau21(jet,subR=0.2):
     float
         Calculo de tau21
     """
-        jet_substruct_features = {}        
+    jet_substruct_features = {}        
     seq = fj.cluster(jet, R=subR, algo='kt')
     cnsts = jet.constituents()
     cndts1 = seq.exclusive_jets(1)
@@ -65,5 +65,8 @@ def tau21(jet,subR=0.2):
         tau2 = subjettiness(cndts2, cnsts)
     else: 
         tau2 = 0
-        
-    return tau2/tau1
+
+    try:     
+        return tau2/tau1
+    except ZeroDivisionError:
+        return 0
