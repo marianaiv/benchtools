@@ -1,18 +1,20 @@
 # Importamos las librerías a utilizar
-#import h5py                                                 # Para manejar los archivos .h5
-#import pyjet as fj                                          # Clustering de los jets
-#import numpy as np
-import pandas as pd                                          # Manejo de tablas
-#import os.path                                              # Manejo de directorios
-from subestructura import deltaR, tau21                      # Calculo de variables 
-from clustering import generador, jets, variables, guardar   # Funciones para el clustering
-#from os import path                                         # Manejo de paths
-from tqdm import tqdm                                        # Barra de progreso
+#import h5py                                                               # Para manejar los archivos .h5
+#import pyjet as fj                                                        # Clustering de los jets
+#import numpy as np              
+import pandas as pd                                                        # Manejo de tablas
+#import os.path                                                            # Manejo de directorios
+from subestructura import deltaR, tau21                                    # Calculo de variables 
+from clustering import generador, leer_labels, jets, variables, guardar    # Funciones para el clustering
+#from os import path                                                       # Manejo de paths
+from tqdm import tqdm                                                      # Barra de progreso
 from optparse import OptionParser
 
 parser = OptionParser(usage="%prog [opt]  inputFiles")
 parser.add_option("--RD", action="store_true", default=False, help="Usa el conjunto de datos RD")
+parser.add_option("--BB1", action="store_true", default=False, help="Usa el conjunto de datos BB1")
 parser.add_option("--dir", type="string", default= None, help="Path del conjunto de datos")
+parser.add_option("--label", type="string", default= None, help="Path del label del conjunto de datos")
 parser.add_option("--out", type="string", default="../data/", help="Carpeta para salvar los datos generados")
 parser.add_option("--outname", type="string", default="None", help="Nombre del archivo para salvar los datos generados")
 parser.add_option("--nbatch", type="int", default=3, help="Número de batches de la data a generar")
@@ -20,12 +22,18 @@ parser.add_option("--nbatch", type="int", default=3, help="Número de batches de
 (flags, args) = parser.parse_args()
 
 RD = flags.RD 
+BB1 = flags.BB1
 
 if RD:
     path_datos = "../../events_anomalydetection.h5"
 
+elif BB1:
+    path_datos = "../../events_LHCO2020_BlackBox1.h5"
+    path_label = "../../events_LHCO2020_BlackBox1.masterkey"
+
 else: 
     path_datos = flags.dir
+    path_label = flags.label
 
 fb = generador(path_datos,chunksize=512*100)
 
@@ -37,6 +45,7 @@ for batch in fb:
     df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrones_j1',
                             'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrones_j2',
                             'm_jj', 'deltaR_j12','n_hadrones', 'label'])
+    
     if batch_idx < flags.nbatch:
         print('Parte {}/{}'.format(batch_idx+1, flags.nbatch))
     elif batch_idx == flags.nbatch:
@@ -44,8 +53,12 @@ for batch in fb:
         break
         
     datos = batch
+    if RD == False:
+        label = leer_labels(path_label)
+        datos = pd.concat([datos, label.iloc[datos.index]], axis=1)
+
     nro_eventos = datos.shape[0]
-    
+
     for evento in tqdm(range(nro_eventos)):
 
         # Obtenemos los datos de un evento
