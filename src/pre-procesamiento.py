@@ -4,8 +4,9 @@
 #import numpy as np              
 import pandas as pd                                                        # Manejo de tablas
 #import os.path                                                            # Manejo de directorios
-from subestructura import deltaR, tau21                                    # Calculo de variables 
-from clustering import generador, leer_labels, jets, variables, guardar    # Funciones para el clustering
+from benchtools.subestructura import deltaR, tau21                                    # Calculo de variables 
+from benchtools.clustering import jets, variables                          # Funciones para el clustering
+from benchtools.datatools import generador, leer_labels, guardar
 #from os import path                                                       # Manejo de paths
 from tqdm import tqdm                                                      # Barra de progreso
 from optparse import OptionParser
