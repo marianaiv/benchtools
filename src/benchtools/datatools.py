@@ -4,7 +4,44 @@ import os.path                          # Manejo de directorios
 from sklearn.preprocessing import MinMaxScaler
 pd.options.mode.chained_assignment = None  # default='warn'
 
+def leer_datos(nombre, nbatch, outdir = '../data'): 
+    """Devuelve un DataFrame de pandas leyendo varios archivos csv.
 
+    Si el argumento `outdir` no es pasado, se utiliza un valor predeterminado.
+
+    Parametros
+    ----------
+    nombre : str
+        Nombre principal del conjunto de datos
+
+    nbatch : int
+        Número de archivos a cargar
+
+    outdir : str
+        Directorio donde se encuentra el archivo (por defecto es '../data')
+
+    Devuelve
+    ------
+    Pandas Dataframe
+        Un dataframe con los datos
+    """
+    # Importamos los datos
+    # Listamos los nombres de los archivos a cargar en una lista
+    nombres = ["".join((nombre,'_{}'.format(batch))) for batch in range(nbatch)]
+    
+    # Hacemos una lista con el path de los archivos
+    datos = [os.path.join(outdir, outname).replace("\\","/") for outname in nombres]
+    
+    # Creamos el DataFrame donde cargaremos los datos
+    df = pd.DataFrame()
+
+    for path in datos:
+        # Cargamos un DataFrame
+        df_i = pd.read_csv(path)
+        # Lo juntamos con el principal
+        df = pd.concat([df, df_i])
+    
+    return df
 
 def generador(filename, chunksize=512,total_size=1100000):
     """Genera un dataframe de pandas utilizando parte de los datos de entrada,
