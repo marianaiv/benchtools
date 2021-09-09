@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 
 def jets(evento, R = 1.0, p = -1, ptmin=20): 
-
     """Genera una lista de jets dado un evento.
 
     Si el argumento `n_hadrones`, `R`, `p` y `ptmin` no es pasado, 

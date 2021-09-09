@@ -42,7 +42,6 @@ def subjettiness(cndts, cnsts):
     return sum(ls)/d0
 
 def tau21(jet,subR=0.2):
-    
     """Calcula tau21(N-subjettiness) de un jet.
 
     Parametros

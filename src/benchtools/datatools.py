@@ -26,6 +26,7 @@ def leer_datos(nombre, nbatch, outdir = '../data'):
         Un dataframe con los datos
     """
     # Importamos los datos
+    
     # Listamos los nombres de los archivos a cargar en una lista
     nombres = ["".join((nombre,'_{}'.format(batch))) for batch in range(nbatch)]
     
