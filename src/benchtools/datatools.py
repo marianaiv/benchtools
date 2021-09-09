@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
+
 def generador(filename, chunksize=512,total_size=1100000):
     """Genera un dataframe de pandas utilizando parte de los datos de entrada,
     manteniendo una cuenta para poder generar todos los datos iterativamente.
@@ -65,6 +66,52 @@ def leer_labels(path_label, column_name=2100):
     df = df.rename(columns={0: column_name})
     
     return df
+
+def separar_datos(df, label='label', normalizar=True):
+    """Separa y normaliza los datos del label a utilizar en el aprendizaje.
+
+    Si el argumento `label` no es pasado, se utiliza un valor predeterminado.
+
+    Parametros
+    ----------
+    df : DataFrame
+        DataFrame con datos y labels
+
+    label : str, list
+        Nombre(s) de la columna con los labels (por defecto es 'labels')
+
+    normalizar: bool
+        Si True normalizar los datos del DataFrame (por defecto es True)
+
+    Devuelve
+    ------
+    X
+        DataFrame con los datos
+    y
+        DataFrame con los labels
+    """
+    # Creamos una lista con las características a considerar en el modelo
+    carac_cols = df.columns.values.tolist()
+    
+    # Eliminamos 'label' porque no es una característica
+    carac_cols.remove(label)
+
+    # Hacemos un dataframe solo con las características
+    X = df[carac_cols]
+    
+    # Normalizamos los datos
+    if normalizar==True:
+        for column in list(X.columns):
+            feature = np.array(X[column]).reshape(-1,1)
+            scaler = MinMaxScaler()
+            scaler.fit(feature)
+            feature_scaled = scaler.transform(feature)
+            X[column] = feature_scaled.reshape(1,-1)[0]
+
+    # Obtenemos la serie con la información sobre señal o fondo
+    y = df[label]
+    
+    return X, y
 
 def guardar(outname, outdir, df):
     """Genera un archivo csv a partir de un DataFrame.
