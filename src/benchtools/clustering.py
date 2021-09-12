@@ -1,87 +1,90 @@
 import pyjet as fj
-from subestructura import deltaR, tau21
+from benchtools.substructure import deltaR, tau21
 import pandas as pd
 import numpy as np
 
-def jets(evento, R = 1.0, p = -1, ptmin=20): 
-    """Genera una lista de jets dado un evento.
+def jets(event, R = 1.0, p = -1, minpt=20): 
+    """Returns a list of jets given an event.
 
-    Si el argumento `n_hadrones`, `R`, `p` y `ptmin` no es pasado, 
-    se utilizan valores predeterminados.
+    If the argument `n_hadrones`, `R`, `p` and `minpt` arent't passed in, 
+    the default values are used.
 
-    Parametros
+    Parameters
     ----------
-    evento : serie
-        Hadrones del evento
+    event : Serie
+        Hadrons of the event 
 
     R : int
-        Tamaño del radio a utilizar para el clustering (por defecto es 1)
+        Size of the radius for the clustering (default is 1)
 
     p : int
-        Algoritmo a utilizar para el clustering (por defecto es -1 o kt)
+        Algorithm to use for the clustering (default os -1 or kt)
     
-    ptmin : int
-        pT mínimo de los jets a listar (por defecto es 20)
+    minpt : int
+        Minimum pT of the jets on the list (default is 20)
 
-    Devuelve
+    Returns
     ------
-    lista
-        Lista de objetos PseudoJets, o jets con ptmin clusterizados para el evento
+    jets: list
+        List of PseudoJets objects that represent the jets
+        of the event
     """
     
-    datos_ss = evento.iloc[:-1]
-    n_hadrones = int(evento.shape[0]/3)
+    # No signal data
+    nsdata = event.iloc[:-1]
+    # Number of hadrons of the event
+    n_hadrons = int(event.shape[0]/3)
 
-    pseudojets_input = np.zeros(len([data for data in datos_ss.iloc[::3] if data > 0]), dtype= fj.DTYPE_PTEPM) 
+    # Were the info of every hadron will go
+    pseudojets_input = np.zeros(len([data for data in nsdata.iloc[::3] if data > 0]), dtype= fj.DTYPE_PTEPM) 
 
-    for hadron in range(n_hadrones):
-        if (datos_ss.iloc[hadron*3] > 0): ## si pT > 0 
+    for hadron in range(n_hadrons):
+        if (nsdata.iloc[hadron*3] > 0): ## if pT > 0 
 
-            ## Llenamos el arreglo con pT, eta y phi de cada "partícula"
-            pseudojets_input[hadron]['pT'] = datos_ss.iloc[hadron*3] 
-            pseudojets_input[hadron]['eta'] = datos_ss.iloc[hadron*3+1]
-            pseudojets_input[hadron]['phi'] = datos_ss.iloc[hadron*3+2]
+            ## Filling with pT, eta and phi of each hadron
+            pseudojets_input[hadron]['pT'] = nsdata.iloc[hadron*3] 
+            pseudojets_input[hadron]['eta'] = nsdata.iloc[hadron*3+1]
+            pseudojets_input[hadron]['phi'] = nsdata.iloc[hadron*3+2]
 
             pass
         pass
 
-    ## Devuelve una "ClusterSequence" (un tipo de lista de pyjet)
+    ## Returns a "ClusterSequence" (pyjets type of list)
     secuencia = fj.cluster(pseudojets_input, R = 1.0, p = -1) 
 
-    ## Con inclusive_jets accedemos a todos los jets que fueron clusterizados
-    ## y filtramos los que tienen pT mayor que 20.
-    ## Hacemos una lista con objetos PseudoJet
-    jets = secuencia.inclusive_jets(ptmin)
+    ## With inclusive_jets we access all the jets that were clustered
+    ## and we filter those with pT greater than 20.
+    jets = secuencia.inclusive_jets(minpt)
     
     return jets
 
-def variables(evento, jets):
-    """Genera un dataframe de variables dado un evento.
+def features(event, jets):
+    """Returns a DataFrame of calculated features given an event.
 
-    Parametros
+    Parameters
     ----------
-    evento : serie
-        Hadrones del evento
+    event : Serie
+        Hadrons of the event 
 
-    jets : lista
-        Lista de jets clusterizados para el evento
+    jets : list
+        List of the clusterized jets for the event
 
-    Devuelve
+    Returns
     ------
-    DataFrame
-        Con pT, mj, eta, phi, E y tau para los dos jets principales,
-        y deltaR, mjj y nro. de hadrones para el evento.
+    entry: DataFrame
+        A DataFrame with pT, mj, eta, phi, E y tau for the two principal jets,
+        and deltaR, mjj y number of hadrons for the event.
     """
-# Extraemos las variables de interes del jet principal
+    # We extract the variables of interest from the main jet 
     pT_j1 = jets[0].pt
     m_j1 = np.abs(jets[0].mass)
     eta_j1 = jets[0].eta
     phi_j1 = jets[0].phi
     E_j1 = jets[0].e
     tau_21_j1= tau21(jets[0])
-    nhadrones_j1 = len(jets[0].constituents())
+    nhadrons_j1 = len(jets[0].constituents())
 
-    # Intentamos extraer las variables del jet secundario
+    # We do the same if there is a secundary jet
     try:
         pT_j2 = jets[1].pt
         m_j2 = np.abs(jets[1].mass)
@@ -89,9 +92,9 @@ def variables(evento, jets):
         phi_j2 = jets[1].phi
         E_j2 = jets[1].e
         tau_21_j2= tau21(jets[1])
-        nhadrones_j2 = len(jets[1].constituents())
+        nhadrons_j2 = len(jets[1].constituents())
 
-    # Si no hay jet secundario colocamos ceros
+    # If there is not a secundary jet, all the variables will be zero
     except IndexError:
         pT_j2 = 0
         m_j2 = 0
@@ -99,20 +102,21 @@ def variables(evento, jets):
         phi_j2 = 0
         E_j2 = 0
         tau_21_j2 = 0
-        nhadrones_j2 = 0
+        nhadrons_j2 = 0
 
-    # Calculamos otras variables
+    # Calculating the general variables of the event
     deltaR_j12 = deltaR(jets[0], jets[1])
     mjj = m_j1 + m_j2
-    n_hadrones = evento.iloc[:-1].astype(bool).sum(axis=0)/3
-    label = evento.iloc[-1]
+    n_hadrons = event.iloc[:-1].astype(bool).sum(axis=0)/3
+    # Getting the label of the event: signal or background
+    label = event.iloc[-1]
 
-    # Agregamos todo al dataframe
-    entry = pd.DataFrame([[pT_j1, m_j1, eta_j1, phi_j1, E_j1, tau_21_j1, nhadrones_j1, 
-                            pT_j2, m_j2, eta_j2, phi_j2, E_j2, tau_21_j2, nhadrones_j2,
-                            mjj,deltaR_j12, n_hadrones, label]],
-                        columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrones_j1',
-                            'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrones_j2',
-                            'm_jj', 'deltaR_j12','n_hadrones', 'label'])
+    # Adding everything to a dataframe
+    entry = pd.DataFrame([[pT_j1, m_j1, eta_j1, phi_j1, E_j1, tau_21_j1, nhadrons_j1, 
+                            pT_j2, m_j2, eta_j2, phi_j2, E_j2, tau_21_j2, nhadrons_j2,
+                            mjj,deltaR_j12, n_hadrons, label]],
+                        columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrons_j1',
+                            'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrons_j2',
+                            'm_jj', 'deltaR_j12','n_hadrons', 'label'])
     
     return entry

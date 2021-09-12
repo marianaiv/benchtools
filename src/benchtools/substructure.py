@@ -1,9 +1,9 @@
 import pyjet as fj
 
 def deltaR(x, y):
-    """Calcula la distancia angular entre dos jets.
+    """Calculates the angular distance between two jets.
 
-    Parametros
+    Parameters
     ----------
     x : PseudoJet
         Jet 1
@@ -11,28 +11,28 @@ def deltaR(x, y):
     y : PseudoJet
         Jet 2
 
-    Devuelve
+    Returns
     ------
     float
-        Distancia angular entre dos jets
+        Angular distance between two jets
     """
     return ((x.phi-y.phi)**2 + (x.eta-y.eta)**2)**0.5
 
 def subjettiness(cndts, cnsts):
-    """Calcula subjettiness de un jet.
+    """Calculates subjettiness of one jet.
 
-    Parametros
+    Parameters
     ----------
     cndts : list
-        Constituyentes del jet
+        Jet constituents
 
     cnsts : PseudoJet
-        Exclusive jet
+        Exclusive jets
 
     Devuelve
     ------
     float
-        Calculo de subjettiness
+        Value for subjettiness
     """
     d0 = sum(c.pt for c in cnsts)
     ls = []
@@ -42,17 +42,18 @@ def subjettiness(cndts, cnsts):
     return sum(ls)/d0
 
 def tau21(jet,subR=0.2):
-    """Calcula tau21(N-subjettiness) de un jet.
+    """Calculates tau21(N-subjettiness) of a jet.
 
-    Parametros
+    Parameters
     ----------
-    jet: PseudoJet
-        Jet resultado del clustering    
+    jet : PseudoJet
+        Resulting jet from the clustering 
+    subR : float  
 
     Devuelve
     ------
     float
-        Calculo de tau21
+        Value for tau21
     """
     jet_substruct_features = {}        
     seq = fj.cluster(jet, R=subR, algo='kt')
@@ -67,5 +68,6 @@ def tau21(jet,subR=0.2):
 
     try:     
         return tau2/tau1
+    # I added this because it was giving me an error
     except ZeroDivisionError:
         return 0

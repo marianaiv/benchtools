@@ -1,72 +1,71 @@
 import pandas as pd
 from io import StringIO
-import os.path                          # Manejo de directorios
+import os.path                          
 from sklearn.preprocessing import MinMaxScaler
 pd.options.mode.chained_assignment = None  # default='warn'
 
-def leer_datos(nombre, nbatch, outdir = '../data'): 
-    """Devuelve un DataFrame de pandas leyendo varios archivos csv.
+def read_multifiles(filename, nbatch, outdir = '../data'): 
+    """Returns a single DataFrame from multiple csv files named: file_0, file_1, ...
 
-    Si el argumento `outdir` no es pasado, se utiliza un valor predeterminado.
+    If the argument `outdir` is not passed in, the default value is used.
 
-    Parametros
+    Parameters
     ----------
-    nombre : str
-        Nombre principal del conjunto de datos
+    filename : str
+        Principal name of the set of files
 
     nbatch : int
-        Número de archivos a cargar
+        Number of files
 
     outdir : str
-        Directorio donde se encuentra el archivo (por defecto es '../data')
+        Path where the files are located  (default is '../data')
 
-    Devuelve
+    Returns
     ------
-    Pandas Dataframe
-        Un dataframe con los datos
+    df : Dataframe
+        A single DataFrame with data from all the files.
     """
-    # Importamos los datos
     
-    # Listamos los nombres de los archivos a cargar en una lista
-    nombres = ["".join((nombre,'_{}'.format(batch))) for batch in range(nbatch)]
+    # Listing the names of the files to upload in a list 
+    names = ["".join((filename,'_{}'.format(batch))) for batch in range(nbatch)]
     
-    # Hacemos una lista con el path de los archivos
-    datos = [os.path.join(outdir, outname).replace("\\","/") for outname in nombres]
+    # Making a list with the path of the files 
+    files = [os.path.join(outdir, outname).replace("\\","/") for outname in names]
     
-    # Creamos el DataFrame donde cargaremos los datos
+    # Create a DataFrame for the data
     df = pd.DataFrame()
 
-    for path in datos:
-        # Cargamos un DataFrame
+    for path in files:
+        # Load one of the files
         df_i = pd.read_csv(path)
-        # Lo juntamos con el principal
+        # Put it together with the main dataframe
         df = pd.concat([df, df_i])
     
     return df
 
-def generador(filename, chunksize=512,total_size=1100000):
-    """Genera un dataframe de pandas utilizando parte de los datos de entrada,
-    manteniendo una cuenta para poder generar todos los datos iterativamente.
+def generator(filename, chunksize=512,total_size=1100000):
+    """Generates iteratively a DataFrame from a large .h5 file
 
-    Si el argumento `chunksize` y `total_size` no es pasado, 
-    se utilizan valores predeterminados.
+    If the arguments `chunksize` and `total_size` is not given in, 
+    default values are used.
 
-    Parametros
+    Parameters
     ----------
     filename : str
-        Dirección del conjunto de datos .h5
+        Path of the file
 
     chunksize : int
-        Tamaño del conjunto de datos a generar (por defecto es 512)
+        Number of rows to generate (default is 512)
 
     total_size : int
-        Numero de filas del archivo (por defecto es 1100000)
+        Total number of rows of the file (default is 1100000)
 
-    Devuelve
+    Returns
     ------
     Pandas Dataframe
-        Un dataframe con parte del conjunto de datos
+        A DataFrame with part of the data.
     """
+    # Starting the counter
     m = 0
     
     while True:
@@ -74,71 +73,65 @@ def generador(filename, chunksize=512,total_size=1100000):
         yield pd.read_hdf(filename,start=m*chunksize, stop=(m+1)*chunksize)
 
         m+=1
+        # If we read all the data, reset the counter
         if (m+1)*chunksize > total_size:
             m=0
 
-def leer_labels(path_label, column_name=2100):
-    """Lee el archivo ASCII que contiene los labels de los eventos: si son señal o fondo.
+def ascii_column(path_label, column_name=2100):
+    """Returns a DataFrame from an ASCII file of one column.
 
-    Si el argumento `column_name` no es pasado, se utiliza un nombre predeterminados.
+    If the argument `column_name` is not passed in, the default value is used.
 
-    Parametros
+    Parameters
     ----------
     path_label : str
-        Dirección del archivo ASCII con los labels
+        Path of the ASCII file
 
     column_name : str
-        Nombre de la columna (por defecto es 2100)
+        Name of the column (default is 2100)
 
-    Devuelve
+    Returns
     ------
-    Pandas Dataframe
-        Un dataframe con parte los labels de los eventos
+    df: Dataframe
+        A one column DataFrame.
     """
-    # leemos el archivo con el key. Es un archivo ASCII donde cada linea corresponde a la información de señal o fondo
+    # Reading the archive
     with open(path_label, 'r') as f:
         data = f.read()
-    # Lo convertimos en dataframe
-    df = pd.read_csv(StringIO(data), header=None)
-    # Le cambiamos el nombre a la columna para que al concatenar con los datos no tenga el mismo nombre que otra columna
-    df = df.rename(columns={0: column_name})
-    
+    # Converting it to a DataFrame
+    df = pd.read_csv(StringIO(data), header=None, names=[column_name])
+
     return df
 
-def separar_datos(df, label='label', normalizar=True):
-    """Separa y normaliza los datos del label a utilizar en el aprendizaje.
+def separate_data(df, label='label', standardize=True):
+    """Separates the features from the label and standardizes the features.
 
-    Si el argumento `label` no es pasado, se utiliza un valor predeterminado.
+    If the argument `label` is not passed in, the default value is used.
 
-    Parametros
+    Parameters
     ----------
     df : DataFrame
-        DataFrame con datos y labels
+        DataFrame with the data and the labels
 
-    label : str, list
-        Nombre(s) de la columna con los labels (por defecto es 'labels')
+    label : str
+        Names of the column with the label (default is 'label')
 
-    normalizar: bool
-        Si True normalizar los datos del DataFrame (por defecto es True)
+    standardize: bool
+        If True, standardizes the features (default is True)
 
-    Devuelve
+    Returns
     ------
-    X
-        DataFrame con los datos
-    y
-        DataFrame con los labels
+    X : DataFrame
+        DataFrame with the features
+    y : Serie
+        Serie with the labels 
     """
-    # Creamos una lista con las características a considerar en el modelo
-    carac_cols = df.columns.values.tolist()
-    
-    # Eliminamos 'label' porque no es una característica
-    carac_cols.remove(label)
 
-    # Hacemos un dataframe solo con las características
-    X = df[carac_cols]
+    # Getting the DataFrame with the features
+    X = df.drop(label, axis=1)
     
-    # Normalizamos los datos
-    if normalizar==True:
+    # Standarizing the data 
+    if standardize==True:
         for column in list(X.columns):
             feature = np.array(X[column]).reshape(-1,1)
             scaler = MinMaxScaler()
@@ -146,32 +139,32 @@ def separar_datos(df, label='label', normalizar=True):
             feature_scaled = scaler.transform(feature)
             X[column] = feature_scaled.reshape(1,-1)[0]
 
-    # Obtenemos la serie con la información sobre señal o fondo
+    # Getting the serie wiht the labels
     y = df[label]
     
     return X, y
 
-def guardar(outname, outdir, df):
-    """Genera un archivo csv a partir de un DataFrame.
+def save_df(outname, outdir, df):
+    """Generates a csv from a DataFrame even if the given path does not exist.
 
-    Parametros
+    Parameters
     ----------
     outname : str
-        Nombre del archivo a generar
+        Name of the generated file
 
     outdir : str
-        Dirección de la carpeta donde se va a guardar el archivo
+        Path where the file will be saved
 
     df : DataFrame
-        DataFrame a guardar
+        DataFrame to save
 
-    Devuelve
+    Returns
     ------
-    Archivo
-        Archivo csv (oudir/outname.csv)
+    File
+        csv file (oudir/outname.csv)
     """
     
-    # Si no existe la carpeta, la crea
+    # If the path does not exists, creates it
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
