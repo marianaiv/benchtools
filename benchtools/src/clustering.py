@@ -1,7 +1,10 @@
+from numpy.core.records import fromstring
 import pyjet as fj
 from benchtools.substructure import deltaR, tau21
+from benchtools.datatools import generator
 import pandas as pd
 import numpy as np
+from tqdm import tqdm                                                      # Progress bar
 
 def jets(event, R = 1.0, p = -1, minpt=20): 
     """Returns a list of jets given an event.
@@ -58,7 +61,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
     
     return jets
 
-def features(event, jets):
+def event_features(event, jets):
     """Returns a DataFrame of calculated features given an event.
 
     Parameters
@@ -73,7 +76,7 @@ def features(event, jets):
     ------
     entry: DataFrame
         A DataFrame with pT, mj, eta, phi, E y tau for the two principal jets,
-        and deltaR, mjj y number of hadrons for the event.
+        and deltaR, mjj and number of hadrons for the event.
     """
     # We extract the variables of interest from the main jet 
     pT_j1 = jets[0].pt
@@ -120,3 +123,99 @@ def features(event, jets):
                             'm_jj', 'deltaR_j12','n_hadrons', 'label'])
     
     return entry
+
+def cluster_events(data):
+    """Returns a DataFrame of features given a DataFrame with multiple events.
+
+    Parameters
+    ----------
+    data : DataFrame
+        With the hadrons for multiple events 
+
+    Returns
+    ------
+    df: DataFrame
+        A DataFrame with pT, mj, eta, phi, E y tau for the two principal jets,
+        deltaR, mjj and number of hadrons for all the events passed.
+    """
+    n_events = data.shape[0]
+    
+    for event in tqdm(range(n_events)):
+        # Getting the data for one event
+        data_event = data.iloc[event,:]
+
+        # Clustering the jets
+        jets_event = jets(data_event, R = 1.0, p = -1, minpt=20)
+
+        # Obtaining the features on a DataFrame
+        entry = features(data_event, jets_event)
+
+        # Adding to the principal DataFrame
+        df = df.append(entry, sort=False)
+
+    return df
+
+def build_features(path_data, nbatch, outname, path_label=None, outdir='../data', chunksize=512*100):
+    """Iterates over a .h5 file to generate multiple csv files 
+    with features for ML for a number nbatch*chuncksize of events.
+
+    Parameters
+    ----------
+    paht_data : str
+        Path were the dataset is 
+
+    nbatch  : int
+        Number of files to create
+    
+    outname : str
+        Principal name of the files to generate
+    
+    path_label : str
+        Path where the labels are (default is None)
+    
+    outdir : str
+        Path where the files will be saved (default is '../data')
+
+    chunksize : int
+        How many lines of the file will be transformed in every batch
+
+    Returns
+    ------
+    csv files
+        A quantity equal to nbatch of csv files with pT, mj, eta, phi, 
+        E and tau for the two principal jets, deltaR, mjj and number of 
+        hadrons for a chuncksize of the events.
+    """
+    # Creating the object to generate the dataframe
+    fb = generator(path_data,chunksize)
+
+    # Initiating the counter
+    batch_idx = 0
+
+    for batch in fb:
+        # A DataFrame to store the features 
+        df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrons_j1',
+                                'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrons_j2',
+                                'm_jj', 'deltaR_j12','n_hadrons', 'label'])
+        
+        # Checking the number of batch
+        if batch_idx < nbatch:
+            print('Part {}/{}'.format(batch_idx+1, nbatch))
+        elif batch_idx == nbatch:
+            print('Done')
+            break
+            
+        data = batch
+
+        # Getting the label column if we are not using the RD DataFrame
+        if path_label != None:
+            label = ascii_column(path_label)
+            data = pd.concat([data, label.iloc[data.index]], axis=1)
+
+        df = cluster_events(data)
+        
+        # Saving the DataFrame as csv for every batch  
+        outname = "".join((flags.outname,'_{}')).format(batch_idx)
+        save_df(outname, outdir, df)
+        
+        batch_idx += 1 
