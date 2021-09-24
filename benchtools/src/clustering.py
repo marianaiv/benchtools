@@ -1,7 +1,7 @@
 from numpy.core.records import fromstring
 import pyjet as fj
-from benchtools.substructure import deltaR, tau21
-from benchtools.datatools import generator
+from benchtools.src.substructure import deltaR, tau21
+from benchtools.src.datatools import generator, save_df
 import pandas as pd
 import numpy as np
 from tqdm import tqdm                                                      # Progress bar
@@ -139,7 +139,8 @@ def cluster_events(data):
         deltaR, mjj and number of hadrons for all the events passed.
     """
     n_events = data.shape[0]
-    
+    events_list =[]
+
     for event in tqdm(range(n_events)):
         # Getting the data for one event
         data_event = data.iloc[event,:]
@@ -148,11 +149,12 @@ def cluster_events(data):
         jets_event = jets(data_event, R = 1.0, p = -1, minpt=20)
 
         # Obtaining the features on a DataFrame
-        entry = features(data_event, jets_event)
+        entry = event_features(data_event, jets_event)
 
         # Adding to the principal DataFrame
-        df = df.append(entry, sort=False)
+        events_list.append(entry)
 
+    df = pd.concat(events_list, ignore_index=True) 
     return df
 
 def build_features(path_data, nbatch, outname, path_label=None, outdir='../data', chunksize=512*100):
@@ -215,7 +217,7 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
         df = cluster_events(data)
         
         # Saving the DataFrame as csv for every batch  
-        outname = "".join((flags.outname,'_{}')).format(batch_idx)
+        outname = "".join((outname,'_{}')).format(batch_idx)
         save_df(outname, outdir, df)
         
         batch_idx += 1 
