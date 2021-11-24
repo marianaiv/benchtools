@@ -71,3 +71,13 @@ def tau21(jet,subR=0.2):
     # I added this because it was giving me an error
     except ZeroDivisionError:
         return 0
+
+def invariantmass(jet1, jet2):
+    E = jet1.e + jet2.e
+        
+    px = jet1.px + jet2.px 
+    py = jet1.py + jet2.py
+    pz = jet1.pz + jet2.pz
+
+    mjj = (E**2-px**2-py**2-pz**2)**0.5
+    return mjj

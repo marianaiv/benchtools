@@ -1,6 +1,6 @@
 from numpy.core.records import fromstring
 import pyjet as fj
-from benchtools.src.substructure import deltaR, tau21
+from benchtools.src.substructure import deltaR, tau21, invariantmass
 from benchtools.src.datatools import generator, save_df
 import pandas as pd
 import numpy as np
@@ -70,7 +70,7 @@ def event_features(event, jets):
         Hadrons of the event 
 
     jets : list
-        List of the clusterized jets for the event
+        List of the clustered jets for the event
 
     Returns
     ------
@@ -109,7 +109,7 @@ def event_features(event, jets):
 
     # Calculating the general variables of the event
     deltaR_j12 = deltaR(jets[0], jets[1])
-    mjj = m_j1 + m_j2
+    mjj = invariantmass(jets[0], jets[1])
     n_hadrons = event.iloc[:-1].astype(bool).sum(axis=0)/3
     # Getting the label of the event: signal or background
     label = event.iloc[-1]
@@ -184,7 +184,7 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
     Returns
     ------
     csv files
-        A quantity equal to nbatch of csv files with pT, mj, eta, phi, 
+        An nbatch number of csv files with pT, mj, eta, phi, 
         E and tau for the two principal jets, deltaR, mjj and number of 
         hadrons for a chuncksize of the events.
     """
@@ -217,7 +217,7 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
         df = cluster_events(data)
         
         # Saving the DataFrame as csv for every batch  
-        outname = "".join((outname,'_{}')).format(batch_idx)
-        save_df(outname, outdir, df)
+        savename = "".join((outname,'_{}')).format(batch_idx)
+        save_df(savename, outdir, df)
         
         batch_idx += 1 
