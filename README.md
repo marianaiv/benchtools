@@ -8,5 +8,5 @@ In this repository there are tools for:
 
 ## Content
 The content of this repository is organized as follows:
-* :book: [notebooks](notebooks): Test of algorithms and anlysis with plots.
+* :book: [notebooks](notebooks): Data analysis with plots.
 * :computer: [src](src): Pipeline and tools to pre-process data and calculate metrics.
