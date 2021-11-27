@@ -57,29 +57,23 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     
     return ax
 
-def bkg_sig_scatter(df, x, y, title=None):
+def bkg_sig_scatter(df, x, y, label='label', title=None):
     """Plot two scatter plots on the same figure on different axis, 
-    for signal and one  background.
+    for signal and background.
 
     Parameters
     ----------
-    xbkg : Pandas Serie
-        Data for one of the distributions
+    df : DataFrame
+        Data for the events
 
-    ybkg  : Pandas Serie
-        Data for one of the distributions
+    x  : str
+        Name of the variable to plot on the x-axis
 
-    xsig : Pandas Serie
-        Data for one of the distributions
-
-    xbkg  : Pandas Serie
-        Data for one of the distributions
+    y : str
+        Name of the variable to plot on the y-axis
     
-    xlabel : str
-        Label for the x-axis (default is None)
-    
-    ylabel : str
-        Label for the y-axis (default is None)
+    label : str
+        Name of the column with the boolean information for signal or background (default is label)
     
     title : str
         Title for the plot (default is None)
@@ -96,14 +90,14 @@ def bkg_sig_scatter(df, x, y, title=None):
     ax2 = fig.add_subplot(1, 2, 2, sharex=ax1, sharey=ax1)
 
     # Signal
-    df_sig = df[df['label']==1]
+    df_sig = df[df[label]==1]
     xsig = df_sig[x]
     ysig= df_sig[y]
     signal= ax2.scatter(xsig, ysig, c='r', alpha=0.5)
     ax2.label_outer()
 
     # Background
-    df_bkg = df[df['label']==0]
+    df_bkg = df[df[label]==0]
     xbkg = df_bkg[x]
     ybkg= df_bkg[y]
     bkg = ax1.scatter(xbkg, ybkg, c='b', alpha=0.5)
