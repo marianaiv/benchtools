@@ -57,7 +57,7 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     
     return ax
 
-def bkg_sig_scatter(xbkg, ybkg, xsig, ysig, xlabel=None, ylabel=None, title=None):
+def bkg_sig_scatter(df, x, y, title=None):
     """Plot two scatter plots on the same figure on different axis, 
     for signal and one  background.
 
@@ -96,18 +96,24 @@ def bkg_sig_scatter(xbkg, ybkg, xsig, ysig, xlabel=None, ylabel=None, title=None
     ax2 = fig.add_subplot(1, 2, 2, sharex=ax1, sharey=ax1)
 
     # Signal
+    df_sig = df[df['label']==1]
+    xsig = df_sig[x]
+    ysig= df_sig[y]
     signal= ax2.scatter(xsig, ysig, c='r', alpha=0.5)
     ax2.label_outer()
 
     # Background
+    df_bkg = df[df['label']==0]
+    xbkg = df_bkg[x]
+    ybkg= df_bkg[y]
     bkg = ax1.scatter(xbkg, ybkg, c='b', alpha=0.5)
-    ax1.set(ylabel=ylabel)
+    ax1.set(ylabel=y)
     #ax1.set_title('bkg')
 
     # Adding information to the plot
     ax2.legend((signal, bkg), ('Signal', 'Background'), loc='upper right', prop={'size': 12})
     fig.suptitle(title)
-    fig.text(0.5, 0.04, xlabel, ha='center', va='center')
+    fig.text(0.5, 0.04, x, ha='center', va='center')
     plt.subplots_adjust(wspace=0);
     
     return ax1, ax2
