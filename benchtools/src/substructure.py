@@ -73,6 +73,20 @@ def tau21(jet,subR=0.2):
         return 0
 
 def invariantmass(jet1, jet2):
+    """Calculates the invariant mass from two jets.
+
+    Parameters
+    ----------
+    jet1 : PseudoJet
+        Resulting jet from the clustering 
+    jet2 : PseudoJet
+        Resulting jet from the clustering  
+
+    Devuelve
+    ------
+    float
+        Value for the invariant mass mjj
+    """
     E = jet1.e + jet2.e
         
     px = jet1.px + jet2.px 
