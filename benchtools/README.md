@@ -6,3 +6,4 @@ This package is constructed as follows:
 
 - **src**: files with functions developed to analyze simulated data for multijet events.
 - **scripts**: files that makes the pipeline for the benchmarking of classification algorithms.
+
