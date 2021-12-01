@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from io import StringIO
 import os.path                          
 from sklearn.preprocessing import MinMaxScaler
