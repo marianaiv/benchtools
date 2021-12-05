@@ -16,8 +16,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=["benchtools",
-              "benchtools.src",
-              "benchtools.scripts"]
+    packages=["benchtools"
+            , "benchtools.src"
+#           , "benchtools.scripts"
+]
 
 )
