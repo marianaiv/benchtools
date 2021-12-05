@@ -41,6 +41,7 @@ def read_multifiles(filename, nbatch, outdir = '../data'):
         df_i = pd.read_csv(path)
         # Put it together with the main dataframe
         df = pd.concat([df, df_i])
+    df = df.reset_index()
     
     return df
 
