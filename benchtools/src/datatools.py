@@ -104,8 +104,8 @@ def ascii_column(path_label, column_name=2100):
 
     return df
 
-def separate_data(df, label='label', standardize=True):
-    """Separates the features from the label and standardizes the features.
+def separate_data(df, label='label', standarize=True):
+    """Separates the features from the label and standarizes the features.
 
     If the argument `label` is not passed in, the default value is used.
 
@@ -117,8 +117,8 @@ def separate_data(df, label='label', standardize=True):
     label : str
         Names of the column with the label (default is 'label')
 
-    standardize: bool
-        If True, standardizes the features (default is True)
+    standarize: bool
+        If True, standarizes the features (default is True)
 
     Returns
     ------
@@ -132,7 +132,7 @@ def separate_data(df, label='label', standardize=True):
     X = df.drop(label, axis=1)
     
     # Standarizing the data 
-    if standardize==True:
+    if standarize==True:
         for column in list(X.columns):
             feature = np.array(X[column]).reshape(-1,1)
             scaler = MinMaxScaler()
