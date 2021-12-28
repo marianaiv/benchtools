@@ -1,10 +1,12 @@
-# Benchmark de algoritmos de clasificación
+# Benchmarking of classification algorithms
 
-Este proyecto es parte de la [Tesis de grado](https://github.com/marianaiv/tesis_grado_UCV) de Mariana Vivas.
+This project is part of the [final degree project](https://github.com/marianaiv/tesis_grado_UCV) of Mariana Vivas.
 
-En este repositorio se encuentran herramientas para: 
-- Pre-procesamiento y análisis de datos
-- Caracterización de algoritmos de clasificación bajo algunas métricas
+In this repository there are tools for: 
+- Data pre-processing and analysis
+- Benchmarking of classification algorithms under performance and reproducibility metrics
 
-## Contenido del repositorio
-**Por definir**
+## Content
+The content of this repository is organized as follows:
+* :book: [notebooks](notebooks): Data analysis with plots and test of algorithms.
+* :computer: [benchtools](benchtools): Package with pipeline and tools to pre-process data and calculate metrics.
