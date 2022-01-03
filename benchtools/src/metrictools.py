@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score
+from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
 
 def roc_curve_and_score(label, pred_proba):
     """Returns the false positive rate (fpr), true positive rate(tpr) and
@@ -30,6 +30,33 @@ def roc_curve_and_score(label, pred_proba):
     fpr, tpr, _ = roc_curve(label, pred_proba.ravel())
     roc_auc = roc_auc_score(label, pred_proba.ravel())
     return fpr, tpr, roc_auc
+
+def pr_curve_and_score(label, pred_proba):
+    """Returns the precision, recall and the average precision (ap) 
+    score for the precision-recall curve (PRc)
+
+    Parameters
+    ----------
+    label : serie
+        True binary labels.
+
+    pred_proba : serie
+        Target scores, can either be probability estimates of the positive class, 
+        confidence values, or non-thresholded measure of decisions.
+
+    Returns
+    ------
+    fpr: 
+        ndarray of shape (>2,)
+
+    tpr:
+        ndarray of shape (>2,)
+    auc:
+        float
+    """
+    precision, recall, _ = precision_recall_curve(label, pred_proba.ravel())
+    ap_score = average_precision_score(label, pred_proba.ravel())
+    return precision, recall, ap_score
 
 def performance_metrics(name, label, pred_label, pred_prob=None):
     """Calculates the recall, precision, f1 score and logarithmic loss.
@@ -209,10 +236,12 @@ def precision_recall_plot(names, label, probs, colors):
 
     # Plotting the curves
     for name, prob, color in zip(names, probs, colors):
-        precision, recall, _ = precision_recall_curve(label.ravel(), prob.ravel())
+        precision, recall, ap_score = pr_curve_and_score(label, prob)
         plt.plot(recall, precision, color=color, lw=2,
-         label='{} PRC'.format(name))
+         label='{} PRC AP={:.3f}'.format(name,ap_score))
 
+    # Plotting the line for a random classificator
+    plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--')
     # Adding the information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
