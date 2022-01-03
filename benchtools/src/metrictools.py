@@ -1,7 +1,8 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-from sklearn.metrics import roc_auc_score, roc_curve, precision_score, log_loss, recall_score, classification_report, f1_score
+from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score
 
 def roc_curve_and_score(label, pred_proba):
     """Returns the false positive rate (fpr), true positive rate(tpr) and
@@ -174,4 +175,50 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors):
     plt.ylabel('$1/\epsilon_{bkg}$')
     plt.title('ROC')
     plt.show()
+    return ax
+
+def precision_recall_plot(names, label, probs, colors):
+    """Plots precision vs. recall for different decision tresholes.
+
+    Parameters
+    ----------
+    names : list
+        Name of the algorithms.
+
+    label: serie
+        True label of every event.
+
+    probs : list
+        Target scores, can either be probability estimates of the positive class, 
+        confidence values, or non-thresholded measure of decisions.
+
+    colors: list
+        List of colors for the curves.
+
+    Returns
+    ------
+    ax:
+        The axis for the plot.
+    """
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+
+    # Plotting the curves
+    for name, prob, color in zip(names, probs, colors):
+        precision, recall, _ = precision_recall_curve(label.ravel(), prob.ravel())
+        plt.plot(recall, precision, color=color, lw=2,
+         label='{} PRC'.format(name))
+
+    # Adding the information to the plot
+    plt.legend(loc="lower right")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('Precision vs. Recall')
+    
     return ax
