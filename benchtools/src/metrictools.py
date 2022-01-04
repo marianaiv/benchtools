@@ -143,7 +143,7 @@ def sig_eff_bkg_rej(names, label, probs, colors):
     for name, prob, color in zip(names, probs, colors):
         fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
         plt.plot(1-fpr, tpr, color=color, lw=2,
-                label='{} ROC AUC={:.3f}'.format(name, roc_auc))
+                label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classificator
     plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--')
@@ -238,7 +238,7 @@ def precision_recall_plot(names, label, probs, colors):
     for name, prob, color in zip(names, probs, colors):
         precision, recall, ap_score = pr_curve_and_score(label, prob)
         plt.plot(recall, precision, color=color, lw=2,
-         label='{} PRC AP={:.3f}'.format(name,ap_score))
+         label='{} AP={:.3f}'.format(name,ap_score))
 
     # Plotting the line for a random classificator
     plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--')
@@ -248,6 +248,6 @@ def precision_recall_plot(names, label, probs, colors):
     plt.ylim([0.0, 1.05])
     plt.xlabel('Recall')
     plt.ylabel('Precision')
-    plt.title('Precision vs. Recall')
+    plt.title('Precision-Recall Curve')
     
     return ax
