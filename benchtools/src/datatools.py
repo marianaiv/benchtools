@@ -28,7 +28,7 @@ def read_multifiles(filename, nbatch, outdir = '../data'):
     """
     
     # Listing the names of the files to upload in a list 
-    names = ["".join((filename,'_{}'.format(batch))) for batch in range(nbatch)]
+    names = ["".join((filename,'_{}.csv'.format(batch))) for batch in range(nbatch)]
     
     # Making a list with the path of the files 
     files = [os.path.join(outdir, outname).replace("\\","/") for outname in names]
@@ -170,5 +170,7 @@ def save_df(outname, outdir, df):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    path = os.path.join(outdir, outname).replace("\\","/")   
+    outname = outname+'.csv'
+    path = os.path.join(outdir, outname).replace("\\","/")  
+    
     df.to_csv(path, sep=',', index=False)
