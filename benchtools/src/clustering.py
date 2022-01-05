@@ -21,7 +21,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
         Size of the radius for the clustering (default is 1)
 
     p : int
-        Algorithm to use for the clustering (default os -1 or kt)
+        Algorithm to use for the clustering (default is -1 or kt)
     
     minpt : int
         Minimum pT of the jets on the list (default is 20)
@@ -53,7 +53,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
         pass
 
     ## Returns a "ClusterSequence" (pyjets type of list)
-    secuencia = fj.cluster(pseudojets_input, R = 1.0, p = -1) 
+    secuencia = fj.cluster(pseudojets_input, R = R, p = p) 
 
     ## With inclusive_jets we access all the jets that were clustered
     ## and we filter those with pT greater than 20.
