@@ -1,7 +1,7 @@
 from numpy.core.records import fromstring
 import pyjet as fj
 from benchtools.src.substructure import deltaR, tau21, invariantmass
-from benchtools.src.datatools import generator, save_df, ascii_column
+from benchtools.src.datatools import generator, save_df, ascii_column, merge_files, delete_multifiles
 import pandas as pd
 import numpy as np
 from tqdm import tqdm                                                      # Progress bar
@@ -221,3 +221,9 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
         save_df(savename, outdir, df)
         
         batch_idx += 1 
+    # Merging in one file 
+    print('Merging files')
+    merge_files(outname, nbatch, outdir)
+
+    # Deleting the multiple files
+    delete_multifiles(outname, nbatch, outdir = '../data')
