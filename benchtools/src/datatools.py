@@ -19,7 +19,7 @@ def read_multifiles(filename, nbatch, outdir = '../data'):
         Number of files
 
     outdir : str
-        Path where the files are located  (default is '../data')
+        Path where the files are located (default is '../data')
 
     Returns
     ------
@@ -174,3 +174,58 @@ def save_df(outname, outdir, df):
     path = os.path.join(outdir, outname).replace("\\","/")  
     
     df.to_csv(path, sep=',', index=False)
+
+def merge_files(filename, nbatch, outdir='../data'):
+    """Generates a single csv from from multiple csv files named
+    as: filename_0.csv, filename_1.csv...
+
+    Parameters
+    ----------
+    filename : str
+        General name of the files
+
+    nbatch : int
+        Number of files
+
+    outdir : str
+        Path where the files are located (default is '../data')
+
+    Returns
+    ------
+    File
+        csv file (oudir/outname.csv)
+    """
+    # Reading the files
+    df = read_multifiles(filename, nbatch)
+
+    # Saving the dataframe to one csv file
+    save_df(filename, outdir, df)
+
+def delete_multifiles(filename, nbatch, outdir = '../data'):
+    """Delete multiple files named as: filename_0.csv, filename_1.csv...
+
+    Parameters
+    ----------
+    filename : str
+        General name of the files
+
+    nbatch : int
+        Number of files
+
+    outdir : str
+        Path where the files are located (default is '../data')
+
+    Returns
+    ------
+    File
+        csv file (oudir/outname.csv)
+    """
+    # Listing the names of the files to upload in a list 
+    names = ["".join((filename,'_{}.csv'.format(batch))) for batch in range(nbatch)]
+    
+    # Making a list with the path of the files 
+    files = [os.path.join(outdir, outname).replace("\\","/") for outname in names]
+
+    # Deleting the files
+    for file in files:
+        os.remove(file)
