@@ -56,7 +56,7 @@ def test_cluster_events():
 def test_build_features():
     
     build_features(path_data="../data/events_anomalydetection_tiny.h5",nbatch=1, outname='test_building', chunksize=10)
-    df = pd.read_csv('../data/test_building_0.csv')
+    df = pd.read_csv('../data/test_building.csv')
     
     # checking it has 10 rows
     assert df.shape[0]==10
@@ -71,5 +71,5 @@ def test_build_features():
     df.isnull().values.any() == False
     
     # deleting the file so it's created every time for the test
-    if os.path.exists('../data/test_building_0.csv'):
-        os.remove('../data/test_building_0.csv')
+    if os.path.exists('../data/test_building.csv'):
+        os.remove('../data/test_building.csv')
