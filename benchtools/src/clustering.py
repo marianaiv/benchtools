@@ -1,12 +1,12 @@
 import os
 import pandas as pd
 import numpy as np
-from tqdm import tqdm  
+from tqdm import tqdm  # Progress bar
 from numpy.core.records import fromstring
 import pyjet as fj
 from benchtools.src.substructure import deltaR, tau21, invariantmass
 from benchtools.src.datatools import generator, save_df, ascii_column, merge_files, delete_multifiles
-                                                    # Progress bar
+                                                    
 
 def jets(event, R = 1.0, p = -1, minpt=20): 
     """Returns a list of jets given an event.
