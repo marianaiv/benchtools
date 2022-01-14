@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 import numpy as np
-from tqdm import tqdm  from numpy.core.records import fromstring
+from tqdm import tqdm  
+from numpy.core.records import fromstring
 import pyjet as fj
 from benchtools.src.substructure import deltaR, tau21, invariantmass
 from benchtools.src.datatools import generator, save_df, ascii_column, merge_files, delete_multifiles
