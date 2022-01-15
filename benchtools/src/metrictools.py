@@ -154,7 +154,6 @@ def sig_eff_bkg_rej(names, label, probs, colors):
     plt.xlabel('Background rejection')
     plt.ylabel('Signal efficiency')
     plt.title('Signal efficiency vs. Background rejection')
-    plt.show()
 
     return ax
 
@@ -201,7 +200,7 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors):
     plt.xlabel('$\epsilon_{sig}$')
     plt.ylabel('$1/\epsilon_{bkg}$')
     plt.title('ROC')
-    plt.show()
+    
     return ax
 
 def precision_recall_plot(names, label, probs, colors):
