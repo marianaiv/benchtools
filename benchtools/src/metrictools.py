@@ -56,6 +56,7 @@ def pr_curve_and_score(label, pred_proba):
     """
     precision, recall, _ = precision_recall_curve(label, pred_proba.ravel())
     ap_score = average_precision_score(label, pred_proba.ravel())
+
     return precision, recall, ap_score
 
 def performance_metrics(name, label, pred_label, pred_prob=None):
@@ -145,8 +146,9 @@ def sig_eff_bkg_rej(names, label, probs, colors):
         plt.plot(1-fpr, tpr, color=color, lw=2,
                 label='{} AUC={:.3f}'.format(name, roc_auc))
 
-    # Plotting the line for a random classificator
+    # Plotting the line for a random classifier
     plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--')
+
     # Adding the information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
@@ -239,8 +241,9 @@ def precision_recall_plot(names, label, probs, colors):
         plt.plot(recall, precision, color=color, lw=2,
          label='{} AP={:.3f}'.format(name,ap_score))
 
-    # Plotting the line for a random classificator
+    # Plotting the line for a random classifier
     plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--')
+    
     # Adding the information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
