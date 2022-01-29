@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt         # Plots
 
 def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bins=50):
-    """Plot two distributions on the same figure and axis given a
-    DataFrame with a column for the variable to plot and the label:
-    signal or background (or true and false).
+    """Plot two distributions on the same figure given a
+    DataFrame with a column for the variable to plot and a label.
 
     Parameters
     ----------
@@ -14,36 +13,33 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
         Name of the variable to plot
 
     label : str
-        Name of the column with the boolean information for signal or background
+        Name of the column with an integer label
     
     xlabel : str
         Label for the x-axis (default is None)
     
     ylabel : str
         Label for the y-axis (default is Events density)
-
     n_bins : int
         Number of bins for the plots
-
     Returns
     ------
     ax : 
         The axis for the plots
     """
-    # Getting the data for signal or background
-    sig = df.loc[df.loc[:,label]==1]
-    bkg = df.loc[df.loc[:,label]==0]
-    
-    # And specifically for what we want to plot
-    sig = sig[variable]
-    bkg = bkg[variable]
+
+    # Getting the labels
+    labels = df[label].unique()
+    colors = ['b','r','y']
     
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     
+    for integer, color in zip(labels, colors):
     # Plotting the histogramas
-    bkg.plot.hist(bins=n_bins, facecolor='b', alpha=0.2, label='background', density=True)
-    sig.plot.hist(bins=n_bins, facecolor='r', alpha=0.2, label='signal', density=True)
+        df_plot = df.loc[df.loc[:,label]==integer]
+        df_plot = df_plot[variable]
+        df_plot.plot.hist(bins=n_bins, facecolor=color, alpha=0.2, label='label {}'.format(integer), density=True)
     
     # Adding information to the plot
     if xlabel != None:
