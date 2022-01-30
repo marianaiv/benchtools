@@ -15,10 +15,10 @@ def roc_curve_and_score(label, pred_proba):
 
     Parameters
     ----------
-    label : serie
+    label : ndarray
         True binary labels.
 
-    pred_proba : serie
+    pred_proba : ndarray
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
@@ -32,8 +32,8 @@ def roc_curve_and_score(label, pred_proba):
     auc:
         float
     '''
-    fpr, tpr, _ = roc_curve(label, pred_proba.ravel())
-    roc_auc = roc_auc_score(label, pred_proba.ravel())
+    fpr, tpr, _ = roc_curve(label.ravel(), pred_proba.ravel())
+    roc_auc = roc_auc_score(label.ravel(), pred_proba.ravel())
     return fpr, tpr, roc_auc
 
 def optimal_threshold(label, pred_proba):
@@ -41,10 +41,10 @@ def optimal_threshold(label, pred_proba):
 
     Parameters
     ----------
-    label : serie
+    label : ndarray
         True binary labels.
 
-    pred_proba : serie
+    pred_proba : ndarray
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
@@ -53,7 +53,7 @@ def optimal_threshold(label, pred_proba):
     treshold: 
         float
     '''
-    fpr, tpr, thresholds = roc_curve(label, pred_proba.ravel())
+    fpr, tpr, thresholds = roc_curve(label.ravel(), pred_proba.ravel())
     # Maximize the function
     optimal_idx = np.argmax(tpr - fpr)
     # Get the treshold for the max value of the function
@@ -68,7 +68,7 @@ def roc_plot(names, labels, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    labels: serie
+    labels: ndarray
         True label of every event.
 
     probs : list
@@ -130,7 +130,7 @@ def rejection_plot(names, labels, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    label: serie
+    label: ndarray
         True label of every event.
 
     probs : list
@@ -193,7 +193,7 @@ def inverse_roc_plot(names, labels, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    labels: serie
+    labels: ndarray
         True label of every event.
 
     probs : list
@@ -255,7 +255,7 @@ def significance_plot(names, labels, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    labels: serie
+    labels: ndarray
         True label of every event.
 
     probs : list
@@ -313,10 +313,10 @@ def pr_curve_and_score(label, pred_prob):
 
     Parameters
     ----------
-    label : serie
+    label : ndarray
         True binary labels.
 
-    pred_proba : serie
+    pred_proba : ndarray
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
@@ -330,8 +330,8 @@ def pr_curve_and_score(label, pred_prob):
     auc:
         float
     '''
-    precision, recall, _ = precision_recall_curve(label, pred_prob.ravel())
-    ap_score = average_precision_score(label, pred_prob.ravel())
+    precision, recall, _ = precision_recall_curve(label.ravel(), pred_prob.ravel())
+    ap_score = average_precision_score(label.ravel(), pred_prob.ravel())
 
     return precision, recall, ap_score
 
@@ -343,7 +343,7 @@ def precision_recall_plot(names, labels, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    labels: serie
+    labels: ndarray
         True label of every event.
 
     probs : list
@@ -407,13 +407,13 @@ def performance_metrics(name, label, pred_label, pred_prob=None):
      name: string
         Name of the classificator.
 
-    label : serie
+    label : ndarray
         True label of every event.
 
-    pred_label: serie
+    pred_label: ndarray
         Predicted label for every event.
     
-    pred_prob: serie
+    pred_prob: ndarray
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions. Default is None
 
