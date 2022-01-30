@@ -60,7 +60,7 @@ def optimal_threshold(label, pred_proba):
     threshold = thresholds[optimal_idx]
     return threshold
 
-def roc_plot(names, label, probs, colors=None):
+def roc_plot(names, labels, probs, colors=None):
     '''Plots the background efficiency (fpr) vs. signal efficiency (tpr)
 
     Parameters
@@ -68,7 +68,7 @@ def roc_plot(names, label, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    label: serie
+    labels: serie
         True label of every event.
 
     probs : list
@@ -83,6 +83,7 @@ def roc_plot(names, label, probs, colors=None):
     ax:
         The axis for the plot.
     '''
+
     if colors is None:
         # Selecting colors
         colors = LIST_COLORS[:len(names)]
@@ -95,15 +96,22 @@ def roc_plot(names, label, probs, colors=None):
     plt.grid()
 
     # Plotting the curves
-    for name, prob, color in zip(names, probs, colors):
-        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-        plt.plot(fpr, tpr, color=color, lw=2,
-                label='{} AUC={:.3f}'.format(name, roc_auc))
+    # In case there are different labels
+    if type(labels)==list:
+        for name, label, prob, color in zip(names, labels, probs, colors):
+            fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+            plt.plot(fpr, tpr, color=color, lw=2,
+                    label='{} AUC={:.3f}'.format(name, roc_auc))
+    else:
+        for name, prob, color in zip(names, probs, colors):
+            fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
+            plt.plot(fpr, tpr, color=color, lw=2,
+                    label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
     plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
 
-    # Adding the information to the plot
+    # Adding information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -114,7 +122,7 @@ def roc_plot(names, label, probs, colors=None):
 
     return ax
 
-def sig_eff_bkg_rej(names, label, probs, colors=None):
+def rejection_plot(names, labels, probs, colors=None):
     '''Plots the signal efficiency (tpr) vs. the background rejection (1-fpr).
 
     Parameters
@@ -150,15 +158,24 @@ def sig_eff_bkg_rej(names, label, probs, colors=None):
     plt.grid()
 
     # Plotting the curves
-    for name, prob, color in zip(names, probs, colors):
-        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-        plt.plot(1-fpr, tpr, color=color, lw=2,
-                label='{} AUC={:.3f}'.format(name, roc_auc))
+    # Different labels
+    if type(labels)==list:
+        for name, label, prob, color in zip(names, labels, probs, colors):
+            fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+            plt.plot(1-fpr, tpr, color=color, lw=2,
+                    label='{} AUC={:.3f}'.format(name, roc_auc))
+
+    # Same label
+    else:
+        for name, prob, color in zip(names, probs, colors):
+            fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
+            plt.plot(1-fpr, tpr, color=color, lw=2,
+                    label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
     plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
 
-    # Adding the information to the plot
+    # Adding information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -168,7 +185,7 @@ def sig_eff_bkg_rej(names, label, probs, colors=None):
 
     return ax
 
-def sig_eff_inv_bkg_eff(names, label, probs, colors=None):
+def inverse_roc_plot(names, labels, probs, colors=None):
     '''Plots the signal efficiency (tpr) vs. rejection (1/fpr).
 
     Parameters
@@ -176,7 +193,7 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    label: serie
+    labels: serie
         True label of every event.
 
     probs : list
@@ -201,17 +218,27 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors=None):
     # Creating the figure an the axis
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(1, 1, 1)
+
     # Setting some parameters
     matplotlib.rcParams.update({'font.size': 14})
     plt.grid()
     
     # Plotting the curves
-    for name, prob, color in zip(names, probs, colors):
-        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-        plt.plot(tpr, 1/fpr, color=color, lw=2,
-            label='{} ROC'.format(name))
+    # Different labels
+    if type(labels)==list:
+        for name, label, prob, color in zip(names, labels, probs, colors):
+            fpr, tpr, _ = roc_curve_and_score(label, prob)
+            plt.plot(tpr, 1/fpr, color=color, lw=2,
+                    label='{}'.format(name))
 
-    # Adding the information to the plot
+    # Same labels
+    else:
+        for name, prob, color in zip(names, probs, colors):
+            fpr, tpr, _ = roc_curve_and_score(labels, prob)
+            plt.plot(tpr, 1/fpr, color=color, lw=2,
+                    label='{}'.format(name))
+
+    # Adding information to the plot
     plt.legend(loc="upper right")
     plt.xlabel('Signal efficiency')
     plt.ylabel('Rejection')
@@ -219,7 +246,7 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors=None):
     
     return ax
 
-def significance_plot(names, label, probs, colors=None):
+def significance_plot(names, labels, probs, colors=None):
     '''Plots the signal efficiency (tpr) vs. the significance
     improvement (tpr/sqrt(fpr)).
 
@@ -228,7 +255,7 @@ def significance_plot(names, label, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    label: serie
+    labels: serie
         True label of every event.
 
     probs : list
@@ -243,8 +270,8 @@ def significance_plot(names, label, probs, colors=None):
     ax:
         The axis for the plot.
     '''
-    # To ignore division by zero error
-    np.seterr(divide='ignore')
+    # To ignore division by zero or NaN error
+    np.seterr(divide='ignore', invalid='ignore')
 
     # Selecting colors in case they weren't specified
     if colors is None:
@@ -258,12 +285,21 @@ def significance_plot(names, label, probs, colors=None):
     plt.grid()
     
     # Plotting the curves
-    for name, prob, color in zip(names, probs, colors):
-        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-        plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
-            label='{} ROC'.format(name))
+    # For different labels
+    if type(labels)==list:
+            for name, label, prob, color in zip(names, labels, probs, colors):
+                fpr, tpr, _ = roc_curve_and_score(label, prob)
+                plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
+                        label='{}'.format(name))
 
-    # Adding the information to the plot
+    # Same labels
+    else:
+        for name, prob, color in zip(names, probs, colors):
+            fpr, tpr, _ = roc_curve_and_score(labels, prob)
+            plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
+                    label='{}'.format(name))
+
+    # Adding information to the plot
     plt.legend(loc="upper right")
     plt.xlabel('Signal efficiency')
     plt.ylabel('Significance improvement')
@@ -299,7 +335,7 @@ def pr_curve_and_score(label, pred_prob):
 
     return precision, recall, ap_score
 
-def precision_recall_plot(names, label, probs, colors=None):
+def precision_recall_plot(names, labels, probs, colors=None):
     '''Plots precision vs. recall for different decision tresholes.
 
     Parameters
@@ -307,7 +343,7 @@ def precision_recall_plot(names, label, probs, colors=None):
     names : list
         Name of the algorithms.
 
-    label: serie
+    labels: serie
         True label of every event.
 
     probs : list
@@ -335,15 +371,24 @@ def precision_recall_plot(names, label, probs, colors=None):
     plt.grid()
 
     # Plotting the curves
-    for name, prob, color in zip(names, probs, colors):
-        precision, recall, ap_score = pr_curve_and_score(label, prob)
-        plt.plot(recall, precision, color=color, lw=2,
-         label='{} AP={:.3f}'.format(name,ap_score))
+        # For different labels
+    if type(labels)==list:
+            for name, label, prob, color in zip(names, labels, probs, colors):
+                precision, recall, ap_score = pr_curve_and_score(label, prob)
+                plt.plot(recall, precision, color=color, lw=2,
+                        label='{} AP={:.3f}'.format(name,ap_score))
+
+    # Same labels
+    else:
+        for name, prob, color in zip(names, probs, colors):
+            precision, recall, ap_score = pr_curve_and_score(labels, prob)
+            plt.plot(recall, precision, color=color, lw=2,
+                    label='{} AP={:.3f}'.format(name,ap_score))
 
     # Plotting the line for a random classifier
     plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--', label='Random classification')
     
-    # Adding the information to the plot
+    # Adding information to the plot
     plt.legend(loc="lower right")
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
