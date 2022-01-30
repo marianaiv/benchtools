@@ -101,7 +101,7 @@ def roc_plot(names, label, probs, colors=None):
                 label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
-    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classifier')
+    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
 
     # Adding the information to the plot
     plt.legend(loc="lower right")
@@ -156,7 +156,7 @@ def sig_eff_bkg_rej(names, label, probs, colors=None):
                 label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
-    plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--')
+    plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
 
     # Adding the information to the plot
     plt.legend(loc="lower right")
@@ -245,7 +245,7 @@ def significance_plot(names, label, probs, colors=None):
     '''
     # To ignore division by zero error
     np.seterr(divide='ignore')
-    
+
     # Selecting colors in case they weren't specified
     if colors is None:
         colors = LIST_COLORS[:len(names)]
@@ -341,7 +341,7 @@ def precision_recall_plot(names, label, probs, colors=None):
          label='{} AP={:.3f}'.format(name,ap_score))
 
     # Plotting the line for a random classifier
-    plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--')
+    plt.plot([0, 0], [0, 0], color='navy', lw=1, linestyle='--', label='Random classification')
     
     # Adding the information to the plot
     plt.legend(loc="lower right")
