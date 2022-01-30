@@ -4,8 +4,13 @@ import matplotlib.pyplot as plt
 import matplotlib
 from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
 
+LIST_COLORS = ['darkorange', 'green', 'crimson', 'blue', 'green'
+    , 'red', 'purple', 'pink', 'gray', 'olive', 'cyan', 'indigo'
+    ,'salmon','gold', 'aquamarine', 'bluevioles', 'magenta', 'darkred'
+    ,'sandybrown', 'darkseagreen','deepskyblue', 'deeppink']
+
 def roc_curve_and_score(label, pred_proba):
-    """Returns the false positive rate (fpr), true positive rate(tpr) and
+    '''Returns the false positive rate (fpr), true positive rate(tpr) and
     the area under the curve (auc) of the ROC curve.
 
     Parameters
@@ -26,14 +31,13 @@ def roc_curve_and_score(label, pred_proba):
         ndarray of shape (>2,)
     auc:
         float
-    """
+    '''
     fpr, tpr, _ = roc_curve(label, pred_proba.ravel())
     roc_auc = roc_auc_score(label, pred_proba.ravel())
     return fpr, tpr, roc_auc
 
-def pr_curve_and_score(label, pred_proba):
-    """Returns the precision, recall and the average precision (ap) 
-    score for the precision-recall curve (PRc)
+def optimal_threshold(label, pred_proba):
+    '''Returns optimal treshold maximizing the true positive rate count.
 
     Parameters
     ----------
@@ -46,72 +50,72 @@ def pr_curve_and_score(label, pred_proba):
 
     Returns
     ------
-    fpr: 
-        ndarray of shape (>2,)
-
-    tpr:
-        ndarray of shape (>2,)
-    auc:
+    treshold: 
         float
-    """
-    precision, recall, _ = precision_recall_curve(label, pred_proba.ravel())
-    ap_score = average_precision_score(label, pred_proba.ravel())
+    '''
+    fpr, tpr, thresholds = roc_curve(label, pred_proba.ravel())
+    # Maximize the function
+    optimal_idx = np.argmax(tpr - fpr)
+    # Get the treshold for the max value of the function
+    threshold = thresholds[optimal_idx]
+    return threshold
 
-    return precision, recall, ap_score
-
-def performance_metrics(name, label, pred_label, pred_prob=None):
-    """Calculates the recall, precision, f1 score and logarithmic loss.
-    Prints a classification report.
+def roc_plot(names, label, probs, colors=None):
+    '''Plots the background efficiency (fpr) vs. signal efficiency (tpr)
 
     Parameters
     ----------
-     name: string
-        Name of the classificator.
+    names : list
+        Name of the algorithms.
 
-    label : serie
+    label: serie
         True label of every event.
 
-    pred_label: serie
-        Predicted label for every event.
-    
-    pred_prob: serie
+    probs : list
         Target scores, can either be probability estimates of the positive class, 
-        confidence values, or non-thresholded measure of decisions. Default is None
+        confidence values, or non-thresholded measure of decisions.
+
+    colors: string
+        List of specific colors for the plots (default is None)
 
     Returns
     ------
-    DataFrame
-        DataFrame with the name, recall, precision, f1 score.
-        Logarithmic loss if pred_prob was passed.
-    """
+    ax:
+        The axis for the plot.
+    '''
+    if colors is None:
+        # Selecting colors
+        colors = LIST_COLORS[:len(names)]
+        
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
 
-    print("="*30)
-    print(name)
+    # Plotting the curves
+    for name, prob, color in zip(names, probs, colors):
+        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+        plt.plot(fpr, tpr, color=color, lw=2,
+                label='{} AUC={:.3f}'.format(name, roc_auc))
 
-    print('****Results****')
+    # Plotting the line for a random classifier
+    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classifier')
 
-    # Calculating metrics
-    precision = precision_score(label, pred_label)
-    f1 = f1_score(label, pred_label)
-    recall = recall_score(label, pred_label)
-    if pred_prob: 
-        ll = log_loss(label, pred_prob)
-        # Naming the columns
-        log_cols=["Classifier", "Recall", "Precision", "F1 score", "Log Loss"]
-        # Inserting the data in the dataframe
-        log_entry = pd.DataFrame([[name, recall, precision*100, f1, ll]], columns=log_cols)
-    else:
-        log_cols=["Classifier", "Recall", "Precision", "F1 score"]
-        # Inserting the data in the dataframe
-        log_entry = pd.DataFrame([[name, recall, precision*100, f1]], columns=log_cols)
+    # Adding the information to the plot
+    plt.legend(loc="lower right")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Background efficiency')
+    plt.ylabel('Signal efficiency')
+    plt.title('ROC curve')
+    plt.show()
 
-    # Print the report
-    print(classification_report(label, pred_label, target_names=['background','signal']))
+    return ax
 
-    return log_entry
-
-def sig_eff_bkg_rej(names, label, probs, colors):
-    """Plots the signal efficiency (tpr) vs. the background rejection (1-fpr).
+def sig_eff_bkg_rej(names, label, probs, colors=None):
+    '''Plots the signal efficiency (tpr) vs. the background rejection (1-fpr).
 
     Parameters
     ----------
@@ -126,16 +130,21 @@ def sig_eff_bkg_rej(names, label, probs, colors):
         confidence values, or non-thresholded measure of decisions.
 
     colors: list
-        List of colors for the curves.
+        List of specific colors for the curves (default is None)
 
     Returns
     ------
     ax:
         The axis for the plot.
-    """
+    '''
+    # Selecting colors in case it weren't specified
+    if colors is None:
+        colors = LIST_COLORS[:len(names)]
+
     # Creating the figure an the axis
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(1, 1, 1)
+
     # Setting some parameters
     matplotlib.rcParams.update({'font.size': 14})
     plt.grid()
@@ -159,9 +168,8 @@ def sig_eff_bkg_rej(names, label, probs, colors):
 
     return ax
 
-def sig_eff_inv_bkg_eff(names, label, probs, colors):
-    """Plots the signal efficiency (tpr) vs. the inverse of 
-    background efficiency (1-fpr).
+def sig_eff_inv_bkg_eff(names, label, probs, colors=None):
+    '''Plots the signal efficiency (tpr) vs. rejection (1/fpr).
 
     Parameters
     ----------
@@ -176,13 +184,19 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors):
         confidence values, or non-thresholded measure of decisions.
 
     colors: list
-        List of colors for the curves.
+        List of specific colors for the curves (default is None)
         
     Returns
     ------
     ax:
         The axis for the plot.
-    """
+    '''
+    # To ignore division by zero error
+    np.seterr(divide='ignore')
+
+    # Selecting colors in case they weren't specified
+    if colors is None:
+        colors = LIST_COLORS[:len(names)]
 
     # Creating the figure an the axis
     fig = plt.figure(figsize=(8, 6))
@@ -199,14 +213,15 @@ def sig_eff_inv_bkg_eff(names, label, probs, colors):
 
     # Adding the information to the plot
     plt.legend(loc="upper right")
-    plt.xlabel('$\epsilon_{sig}$')
-    plt.ylabel('$1/\epsilon_{bkg}$')
+    plt.xlabel('Signal efficiency')
+    plt.ylabel('Rejection')
     plt.title('ROC')
     
     return ax
 
-def precision_recall_plot(names, label, probs, colors):
-    """Plots precision vs. recall for different decision tresholes.
+def significance_plot(names, label, probs, colors=None):
+    '''Plots the signal efficiency (tpr) vs. the significance
+    improvement (tpr/sqrt(fpr)).
 
     Parameters
     ----------
@@ -221,16 +236,100 @@ def precision_recall_plot(names, label, probs, colors):
         confidence values, or non-thresholded measure of decisions.
 
     colors: list
-        List of colors for the curves.
+        List of specific colors for the curves (default is None)
+        
+    Returns
+    ------
+    ax:
+        The axis for the plot.
+    '''
+    # To ignore division by zero error
+    np.seterr(divide='ignore')
+    
+    # Selecting colors in case they weren't specified
+    if colors is None:
+        colors = LIST_COLORS[:len(names)]
+
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+    
+    # Plotting the curves
+    for name, prob, color in zip(names, probs, colors):
+        fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+        plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
+            label='{} ROC'.format(name))
+
+    # Adding the information to the plot
+    plt.legend(loc="upper right")
+    plt.xlabel('Signal efficiency')
+    plt.ylabel('Significance improvement')
+    plt.title('ROC')
+    
+    return ax
+
+def pr_curve_and_score(label, pred_prob):
+    '''Returns the precision, recall and the average precision (ap) 
+    score for the precision-recall curve (PRc)
+
+    Parameters
+    ----------
+    label : serie
+        True binary labels.
+
+    pred_proba : serie
+        Target scores, can either be probability estimates of the positive class, 
+        confidence values, or non-thresholded measure of decisions.
+
+    Returns
+    ------
+    fpr: 
+        ndarray of shape (>2,)
+
+    tpr:
+        ndarray of shape (>2,)
+    auc:
+        float
+    '''
+    precision, recall, _ = precision_recall_curve(label, pred_prob.ravel())
+    ap_score = average_precision_score(label, pred_prob.ravel())
+
+    return precision, recall, ap_score
+
+def precision_recall_plot(names, label, probs, colors=None):
+    '''Plots precision vs. recall for different decision tresholes.
+
+    Parameters
+    ----------
+    names : list
+        Name of the algorithms.
+
+    label: serie
+        True label of every event.
+
+    probs : list
+        Target scores, can either be probability estimates of the positive class, 
+        confidence values, or non-thresholded measure of decisions.
+
+    colors: list
+        List of specific colors for the curves (default is None)
 
     Returns
     ------
     ax:
         The axis for the plot.
-    """
+    '''
+    # Selecting colors in case they weren't specified
+    if colors is None:
+        colors = LIST_COLORS[:len(names)]
+
     # Creating the figure an the axis
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(1, 1, 1)
+
     # Setting some parameters
     matplotlib.rcParams.update({'font.size': 14})
     plt.grid()
@@ -253,3 +352,54 @@ def precision_recall_plot(names, label, probs, colors):
     plt.title('Precision-Recall Curve')
     
     return ax
+
+def performance_metrics(name, label, pred_label, pred_prob=None):
+    '''Calculates the recall, precision, f1 score and logarithmic loss.
+    Prints a classification report.
+
+    Parameters
+    ----------
+     name: string
+        Name of the classificator.
+
+    label : serie
+        True label of every event.
+
+    pred_label: serie
+        Predicted label for every event.
+    
+    pred_prob: serie
+        Target scores, can either be probability estimates of the positive class, 
+        confidence values, or non-thresholded measure of decisions. Default is None
+
+    Returns
+    ------
+    DataFrame
+        DataFrame with the name, recall, precision, f1 score.
+        Logarithmic loss if pred_prob was passed.
+    '''
+
+    print("="*30)
+    print(name)
+
+    print('****Results****')
+
+    # Calculating metrics
+    precision = precision_score(label, pred_label)
+    f1 = f1_score(label, pred_label)
+    recall = recall_score(label, pred_label)
+    if pred_prob is not None: 
+        ll = log_loss(label, pred_prob)
+        # Naming the columns
+        log_cols=["Classifier", "Recall", "Precision", "F1 score", "Log Loss"]
+        # Inserting the data in the dataframe
+        log_entry = pd.DataFrame([[name, recall, precision*100, f1, ll]], columns=log_cols)
+    else:
+        log_cols=["Classifier", "Recall", "Precision", "F1 score"]
+        # Inserting the data in the dataframe
+        log_entry = pd.DataFrame([[name, recall, precision*100, f1]], columns=log_cols)
+
+    # Print the report
+    print(classification_report(label, pred_label, target_names=['background','signal']))
+
+    return log_entry
