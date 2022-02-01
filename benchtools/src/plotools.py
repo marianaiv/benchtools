@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt         # Plots
+import matplotlib.pyplot as plt
 
 def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bins=50):
-    """Plot two distributions on the same figure given a
+    '''Plot two distributions on the same figure given a
     DataFrame with a column for the variable to plot and a label.
 
     Parameters
@@ -26,7 +26,7 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     ------
     ax : 
         The axis for the plots
-    """
+    '''
 
     # Getting the labels
     labels = df[label].unique()
@@ -54,7 +54,7 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     return ax
 
 def bkg_sig_scatter(df, x, y, label='label', title=None):
-    """Plot two scatter plots on the same figure on different axis, 
+    '''Plot two scatter plots on the same figure on different axis, 
     for signal and background.
 
     Parameters
@@ -78,7 +78,7 @@ def bkg_sig_scatter(df, x, y, label='label', title=None):
     ------
     ax1, ax2 : 
         The axis of the plots
-    """
+    '''
     fig = plt.figure(figsize=[12, 4])
 
     # Creating the subplots
@@ -109,7 +109,7 @@ def bkg_sig_scatter(df, x, y, label='label', title=None):
     return ax1, ax2
 
 def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=False):
-    """Plots the distribution of the test and the prediction on an axis on the same plot, 
+    '''Plots the distribution of the test and the prediction on an axis on the same plot, 
     separating signal and background.
 
     Parameters
@@ -130,7 +130,7 @@ def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=
     ------
     ax : 
         The axis of the plot
-    """
+    '''
     # Separating signal from background for both the test and pred
     pred_bkg = df[df[ypred] == 0]
     pred_sig = df[df[ypred] == 1]
