@@ -385,9 +385,9 @@ def precision_recall_plot(names, labels, probs, colors=None):
             plt.plot(recall, precision, color=color, lw=2,
                     label='{} AP={:.3f}'.format(name,ap_score))
 
+        # Calculating the ratio of signal
         _, counts = np.unique(labels, return_counts=True)
         ratio = counts[1]/counts[0]
-        print(ratio)
         # Plotting the line for a random classifier
         plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification')
     
