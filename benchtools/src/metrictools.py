@@ -1,10 +1,11 @@
+import string
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
 
-LIST_COLORS = ['darkorange', 'green', 'crimson', 'blue', 'green'
+LIST_COLORS = ['darkorange', 'crimson', 'green', 'blue', 'green'
     , 'red', 'purple', 'pink', 'gray', 'olive', 'cyan', 'indigo'
     ,'salmon','gold', 'aquamarine', 'bluevioles', 'magenta', 'darkred'
     ,'sandybrown', 'darkseagreen','deepskyblue', 'deeppink']
@@ -24,13 +25,14 @@ def roc_curve_and_score(label, pred_proba):
 
     Returns
     ------
-    fpr: 
-        ndarray of shape (>2,)
+    fpr: ndarray
+        False positive rate.
 
-    tpr:
-        ndarray of shape (>2,)
-    auc:
-        float
+    tpr: ndarray
+        True positive rate.
+
+    auc: float
+        AUC score.
     '''
     fpr, tpr, _ = roc_curve(label.ravel(), pred_proba.ravel())
     roc_auc = roc_auc_score(label.ravel(), pred_proba.ravel())
@@ -50,8 +52,8 @@ def optimal_threshold(label, pred_proba):
 
     Returns
     ------
-    treshold: 
-        float
+    treshold: float
+        Optimal threshold
     '''
     fpr, tpr, thresholds = roc_curve(label.ravel(), pred_proba.ravel())
     # Maximize the function
@@ -60,53 +62,67 @@ def optimal_threshold(label, pred_proba):
     threshold = thresholds[optimal_idx]
     return threshold
 
-def roc_plot(names, labels, probs, colors=None):
+def roc_plot(names, labels, probs, colors=LIST_COLORS):
     '''Plots the background efficiency (fpr) vs. signal efficiency (tpr)
 
     Parameters
     ----------
-    names : list
+    names : string or list of strings
         Name of the algorithms.
 
-    labels: ndarray
+    labels: ndarray or list of ndarrays
         True label of every event.
 
-    probs : list
+    probs : ndarray or list of ndarrays
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
-    colors: string
-        List of specific colors for the plots (default is None)
-
+    colors: list 
+        List of specific colors for the curves (default is LIST_COLORS)
+        
     Returns
     ------
     ax:
         The axis for the plot.
     '''
 
-    if colors is None:
-        # Selecting colors
-        colors = LIST_COLORS[:len(names)]
-        
-    # Creating the figure an the axis
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(1, 1, 1)
-    # Setting some parameters
-    matplotlib.rcParams.update({'font.size': 14})
-    plt.grid()
+    # For plotting just one curve 
+    if type(probs) is not list:
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
 
-    # Plotting the curves
-    # In case there are different labels
-    if type(labels)==list:
-        for name, label, prob, color in zip(names, labels, probs, colors):
-            fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-            plt.plot(fpr, tpr, color=color, lw=2,
-                    label='{} AUC={:.3f}'.format(name, roc_auc))
-    else:
-        for name, prob, color in zip(names, probs, colors):
-            fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
-            plt.plot(fpr, tpr, color=color, lw=2,
-                    label='{} AUC={:.3f}'.format(name, roc_auc))
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+
+        # In case there is no selected color
+        if type(colors) is not string:
+            colors = LIST_COLORS[0]
+
+        # Plotting the curve
+        fpr, tpr, roc_auc = roc_curve_and_score(labels, probs)
+        plt.plot(fpr, tpr, color=colors, lw=2, label='{} AUC={:.3f}'.format(names, roc_auc))
+
+    # For plotting multiple curves
+    else:   
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+
+        # Plotting the curves
+        # In case there are different labels
+        if type(labels)==list:
+            for name, label, prob, color in zip(names, labels, probs, colors):
+                fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+                plt.plot(fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
+        else:
+            for name, prob, color in zip(names, probs, colors):
+                fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
+                plt.plot(fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
     plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
@@ -122,86 +138,103 @@ def roc_plot(names, labels, probs, colors=None):
 
     return ax
 
-def rejection_plot(names, labels, probs, colors=None):
+def rejection_plot(names, labels, probs, colors=LIST_COLORS):
     '''Plots the signal efficiency (tpr) vs. the background rejection (1-fpr).
 
     Parameters
     ----------
-    names : list
+    names : string or list of strings
         Name of the algorithms.
 
-    label: ndarray
+    labels: ndarray or list of ndarrays
         True label of every event.
 
-    probs : list
+    probs : ndarray or list of ndarrays
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
-    colors: list
-        List of specific colors for the curves (default is None)
-
+    colors: list 
+        List of specific colors for the curves (default is LIST_COLORS)
+        
     Returns
     ------
     ax:
         The axis for the plot.
     '''
-    # Selecting colors in case it weren't specified
-    if colors is None:
-        colors = LIST_COLORS[:len(names)]
 
-    # Creating the figure an the axis
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(1, 1, 1)
+    # For plotting just one curve
+    if type(probs) is not list:
 
-    # Setting some parameters
-    matplotlib.rcParams.update({'font.size': 14})
-    plt.grid()
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
 
-    # Plotting the curves
-    # Different labels
-    if type(labels)==list:
-        for name, label, prob, color in zip(names, labels, probs, colors):
-            fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
-            plt.plot(1-fpr, tpr, color=color, lw=2,
-                    label='{} AUC={:.3f}'.format(name, roc_auc))
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
 
-    # Same label
-    else:
-        for name, prob, color in zip(names, probs, colors):
-            fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
-            plt.plot(1-fpr, tpr, color=color, lw=2,
-                    label='{} AUC={:.3f}'.format(name, roc_auc))
+        # Selecting color in case it wasn't specified
+        if type(colors) is not string: 
+            colors = LIST_COLORS[0]
+
+        fpr, tpr, roc_auc = roc_curve_and_score(labels, probs)
+        plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(names, roc_auc))
+
+    # For plotting multiple curves
+    else: 
+
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
+
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+
+        # Plotting the curves
+
+        # Different labels
+        if type(labels)==list:
+            for name, label, prob, color in zip(names, labels, probs, colors):
+                fpr, tpr, roc_auc = roc_curve_and_score(label, prob)
+                plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
+
+        # Same label
+        else:
+            for name, prob, color in zip(names, probs, colors):
+                fpr, tpr, roc_auc = roc_curve_and_score(labels, prob)
+                plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
     plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
 
     # Adding information to the plot
-    plt.legend(loc="lower right")
+    plt.legend(loc="lower left")
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('Background rejection')
     plt.ylabel('Signal efficiency')
-    plt.title('Signal efficiency vs. Background rejection')
+    plt.title('Rejection ROC')
 
     return ax
 
-def inverse_roc_plot(names, labels, probs, colors=None):
+def inverse_roc_plot(names, labels, probs, colors=LIST_COLORS):
     '''Plots the signal efficiency (tpr) vs. rejection (1/fpr).
 
     Parameters
     ----------
-    names : list
+    names : string or list of strings
         Name of the algorithms.
 
-    labels: ndarray
+    labels: ndarray or list of ndarrays
         True label of every event.
 
-    probs : list
+    probs : ndarray or list of ndarrays
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
-    colors: list
-        List of specific colors for the curves (default is None)
+    colors: list 
+        List of specific colors for the curves (default is LIST_COLORS)
         
     Returns
     ------
@@ -211,59 +244,73 @@ def inverse_roc_plot(names, labels, probs, colors=None):
     # To ignore division by zero error
     np.seterr(divide='ignore')
 
-    # Selecting colors in case they weren't specified
-    if colors is None:
-        colors = LIST_COLORS[:len(names)]
+    # For plotting one curve
+    if type(probs) is not list:
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
 
-    # Creating the figure an the axis
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(1, 1, 1)
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+        
+        # In case there is no selected color
+        if type(colors) is not string:
+            colors = LIST_COLORS[0]
 
-    # Setting some parameters
-    matplotlib.rcParams.update({'font.size': 14})
-    plt.grid()
-    
-    # Plotting the curves
-    # Different labels
-    if type(labels)==list:
-        for name, label, prob, color in zip(names, labels, probs, colors):
-            fpr, tpr, _ = roc_curve_and_score(label, prob)
-            plt.plot(tpr, 1/fpr, color=color, lw=2,
-                    label='{}'.format(name))
+        # Plotting the curve
+        fpr, tpr, _ = roc_curve_and_score(labels, probs)
+        plt.plot(tpr, 1/fpr, color=colors, lw=2, label='{}'.format(names))
 
-    # Same labels
-    else:
-        for name, prob, color in zip(names, probs, colors):
-            fpr, tpr, _ = roc_curve_and_score(labels, prob)
-            plt.plot(tpr, 1/fpr, color=color, lw=2,
-                    label='{}'.format(name))
+    # Multiple curves
+    else: 
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
+
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+        
+        # Plotting the curves
+        # Different labels
+        if type(labels)==list:
+            for name, label, prob, color in zip(names, labels, probs, colors):
+                fpr, tpr, _ = roc_curve_and_score(label, prob)
+                plt.plot(tpr, 1/fpr, color=color, lw=2, label='{}'.format(name))
+
+        # Same labels
+        else:
+            for name, prob, color in zip(names, probs, colors):
+                fpr, tpr, _ = roc_curve_and_score(labels, prob)
+                plt.plot(tpr, 1/fpr, color=color, lw=2, label='{}'.format(name))
 
     # Adding information to the plot
     plt.legend(loc="upper right")
     plt.xlabel('Signal efficiency')
     plt.ylabel('Rejection')
-    plt.title('ROC')
+    plt.title('Inverse ROC')
     
     return ax
 
-def significance_plot(names, labels, probs, colors=None):
+def significance_plot(names, labels, probs, colors=LIST_COLORS):
     '''Plots the signal efficiency (tpr) vs. the significance
     improvement (tpr/sqrt(fpr)).
 
     Parameters
     ----------
-    names : list
+    names : string or list of strings
         Name of the algorithms.
 
-    labels: ndarray
+    labels: ndarray or list of ndarrays
         True label of every event.
 
-    probs : list
+    probs : ndarray or list of ndarrays
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
-    colors: list
-        List of specific colors for the curves (default is None)
+    colors: list 
+        List of specific colors for the curves (default is LIST_COLORS)
         
     Returns
     ------
@@ -273,37 +320,52 @@ def significance_plot(names, labels, probs, colors=None):
     # To ignore division by zero or NaN error
     np.seterr(divide='ignore', invalid='ignore')
 
-    # Selecting colors in case they weren't specified
-    if colors is None:
-        colors = LIST_COLORS[:len(names)]
+    # For plotting one curve
+    if type(probs) is not list:
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
 
-    # Creating the figure an the axis
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(1, 1, 1)
-    # Setting some parameters
-    matplotlib.rcParams.update({'font.size': 14})
-    plt.grid()
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+        
+        # In case there is no selected color
+        if type(colors) is not string:
+            colors = LIST_COLORS[0]
+
+        # Plotting the curve
+        fpr, tpr, _ = roc_curve_and_score(labels, probs)
+        plt.plot(tpr, tpr/np.sqrt(fpr), color=colors, lw=2, label='{}'.format(names))
     
-    # Plotting the curves
-    # For different labels
-    if type(labels)==list:
-            for name, label, prob, color in zip(names, labels, probs, colors):
-                fpr, tpr, _ = roc_curve_and_score(label, prob)
-                plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
-                        label='{}'.format(name))
+    # Multiple curves
+    else: 
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+        
+        # Plotting the curves
+        
+        # For different labels
+        if type(labels)==list:
+                for name, label, prob, color in zip(names, labels, probs, colors):
+                    fpr, tpr, _ = roc_curve_and_score(label, prob)
+                    plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2, label='{}'.format(name))
 
-    # Same labels
-    else:
-        for name, prob, color in zip(names, probs, colors):
-            fpr, tpr, _ = roc_curve_and_score(labels, prob)
-            plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2,
-                    label='{}'.format(name))
+        # Same labels
+        else:
+            for name, prob, color in zip(names, probs, colors):
+                fpr, tpr, _ = roc_curve_and_score(labels, prob)
+                plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2, label='{}'.format(name))
 
     # Adding information to the plot
     plt.legend(loc="upper right")
     plt.xlabel('Signal efficiency')
     plt.ylabel('Significance improvement')
-    plt.title('ROC')
+    plt.title('Significance ROC')
     
     return ax
 
@@ -335,61 +397,82 @@ def pr_curve_and_score(label, pred_prob):
 
     return precision, recall, ap_score
 
-def precision_recall_plot(names, labels, probs, colors=None):
+def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
     '''Plots precision vs. recall for different decision tresholes.
 
     Parameters
     ----------
-    names : list
+    names : string or list of strings
         Name of the algorithms.
 
-    labels: ndarray
+    labels: ndarray or list of ndarrays
         True label of every event.
 
-    probs : list
+    probs : ndarray or list of ndarrays
         Target scores, can either be probability estimates of the positive class, 
         confidence values, or non-thresholded measure of decisions.
 
-    colors: list
-        List of specific colors for the curves (default is None)
-
+    colors: list 
+        List of specific colors for the curves (default is LIST_COLORS)
+        
     Returns
     ------
     ax:
         The axis for the plot.
     '''
-    # Selecting colors in case they weren't specified
-    if colors is None:
-        colors = LIST_COLORS[:len(names)]
 
-    # Creating the figure an the axis
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(1, 1, 1)
+    # For plotting one curve
+    if type(probs) is not list:
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
 
-    # Setting some parameters
-    matplotlib.rcParams.update({'font.size': 14})
-    plt.grid()
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+        
+        # In case there is no selected color
+        if type(colors) is not string:
+            colors = LIST_COLORS[0]
 
-    # Plotting the curves
-        # For different labels
-    if type(labels)==list:
-            for name, label, prob, color in zip(names, labels, probs, colors):
-                precision, recall, ap_score = pr_curve_and_score(label, prob)
-                plt.plot(recall, precision, color=color, lw=2,
-                        label='{} AP={:.3f}'.format(name,ap_score))
-
-    # Same labels
-    else:
-        for name, prob, color in zip(names, probs, colors):
-            precision, recall, ap_score = pr_curve_and_score(labels, prob)
-            plt.plot(recall, precision, color=color, lw=2,
-                    label='{} AP={:.3f}'.format(name,ap_score))
+        # Plotting the curve
+        precision, recall, ap_score = pr_curve_and_score(labels, probs)
+        plt.plot(recall, precision, color=colors, lw=2, label='{} AP={:.3f}'.format(names,ap_score))
 
         # Calculating the ratio of signal
         _, counts = np.unique(labels, return_counts=True)
         ratio = counts[1]/counts[0]
         # Plotting the line for a random classifier
         plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification')
+
+    # Multiple curves
+    else:
+        # Creating the figure an the axis
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(1, 1, 1)
+
+        # Setting some parameters
+        matplotlib.rcParams.update({'font.size': 14})
+        plt.grid()
+
+        # Plotting the curves
+            # For different labels
+        if type(labels)==list:
+                for name, label, prob, color in zip(names, labels, probs, colors):
+                    precision, recall, ap_score = pr_curve_and_score(label, prob)
+                    plt.plot(recall, precision, color=color, lw=2, label='{} AP={:.3f}'.format(name,ap_score))
+
+        # Same labels
+        else:
+            for name, prob, color in zip(names, probs, colors):
+                precision, recall, ap_score = pr_curve_and_score(labels, prob)
+                plt.plot(recall, precision, color=color, lw=2, label='{} AP={:.3f}'.format(name,ap_score))
+
+            # Calculating the ratio of signal
+            _, counts = np.unique(labels, return_counts=True)
+            ratio = counts[1]/counts[0]
+            # Plotting the line for a random classifier
+            plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification')
     
     # Adding information to the plot
     plt.legend(loc="lower right")
@@ -422,8 +505,8 @@ def performance_metrics(name, label, pred_label, pred_prob=None):
 
     Returns
     ------
-    DataFrame
-        DataFrame with the name, recall, precision, f1 score.
+    log_entry : DataFrame
+        With the name, recall, precision, f1 score. 
         Logarithmic loss if pred_prob was passed.
     '''
 
