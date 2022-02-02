@@ -178,7 +178,7 @@ def rejection_plot(names, labels, probs, colors=LIST_COLORS):
             colors = LIST_COLORS[0]
 
         fpr, tpr, roc_auc = roc_curve_and_score(labels, probs)
-        plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(names, roc_auc))
+        plt.plot(1-fpr, tpr, color=colors, lw=2, label='{} AUC={:.3f}'.format(names, roc_auc))
 
     # For plotting multiple curves
     else: 
