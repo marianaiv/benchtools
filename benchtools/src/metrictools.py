@@ -85,17 +85,17 @@ def roc_plot(names, labels, probs, colors=LIST_COLORS):
     ax:
         The axis for the plot.
     '''
+    
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
 
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+    
     # For plotting just one curve 
     if type(probs) is not list:
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-
         # In case there is no selected color
         if type(colors) is not string:
             colors = LIST_COLORS[0]
@@ -106,13 +106,6 @@ def roc_plot(names, labels, probs, colors=LIST_COLORS):
 
     # For plotting multiple curves
     else:   
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-
         # Plotting the curves
         # In case there are different labels
         if type(labels)==list:
@@ -162,16 +155,16 @@ def rejection_plot(names, labels, probs, colors=LIST_COLORS):
         The axis for the plot.
     '''
 
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+
     # For plotting just one curve
     if type(probs) is not list:
-
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
 
         # Selecting color in case it wasn't specified
         if type(colors) is not string: 
@@ -182,15 +175,6 @@ def rejection_plot(names, labels, probs, colors=LIST_COLORS):
 
     # For plotting multiple curves
     else: 
-
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-
         # Plotting the curves
 
         # Different labels
@@ -244,16 +228,16 @@ def inverse_roc_plot(names, labels, probs, colors=LIST_COLORS):
     # To ignore division by zero error
     np.seterr(divide='ignore')
 
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+
     # For plotting one curve
     if type(probs) is not list:
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-        
         # In case there is no selected color
         if type(colors) is not string:
             colors = LIST_COLORS[0]
@@ -264,14 +248,6 @@ def inverse_roc_plot(names, labels, probs, colors=LIST_COLORS):
 
     # Multiple curves
     else: 
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-        
         # Plotting the curves
         # Different labels
         if type(labels)==list:
@@ -320,16 +296,17 @@ def significance_plot(names, labels, probs, colors=LIST_COLORS):
     # To ignore division by zero or NaN error
     np.seterr(divide='ignore', invalid='ignore')
 
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+
     # For plotting one curve
     if type(probs) is not list:
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-        
+    
         # In case there is no selected color
         if type(colors) is not string:
             colors = LIST_COLORS[0]
@@ -340,13 +317,6 @@ def significance_plot(names, labels, probs, colors=LIST_COLORS):
     
     # Multiple curves
     else: 
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-        
         # Plotting the curves
         
         # For different labels
@@ -421,16 +391,17 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
         The axis for the plot.
     '''
 
+    # Creating the figure an the axis
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Setting some parameters
+    matplotlib.rcParams.update({'font.size': 14})
+    plt.grid()
+    
     # For plotting one curve
     if type(probs) is not list:
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
 
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-        
         # In case there is no selected color
         if type(colors) is not string:
             colors = LIST_COLORS[0]
@@ -447,14 +418,6 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
 
     # Multiple curves
     else:
-        # Creating the figure an the axis
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(1, 1, 1)
-
-        # Setting some parameters
-        matplotlib.rcParams.update({'font.size': 14})
-        plt.grid()
-
         # Plotting the curves
             # For different labels
         if type(labels)==list:
