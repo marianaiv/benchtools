@@ -190,7 +190,7 @@ def rejection_plot(names, labels, probs, colors=LIST_COLORS):
                 plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
-    plt.plot([1, 0], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
+    plt.plot(1-tpr, tpr, color='navy', lw=1, linestyle='--', label='Random classification')
 
     # Adding information to the plot
     plt.legend(loc="lower left")
@@ -261,6 +261,12 @@ def inverse_roc_plot(names, labels, probs, colors=LIST_COLORS):
                 fpr, tpr, _ = roc_curve_and_score(labels, prob)
                 plt.plot(tpr, 1/fpr, color=color, lw=2, label='{}'.format(name))
 
+    # Plotting the line for a random classifier
+    plt.plot(tpr, 1/tpr, color='navy', lw=1, linestyle='--', label='Random classification')
+
+    # Logarithmic y-axis
+    ax.set_yscale('log')
+
     # Adding information to the plot
     plt.legend(loc="upper right")
     plt.xlabel('Signal efficiency')
@@ -330,6 +336,9 @@ def significance_plot(names, labels, probs, colors=LIST_COLORS):
             for name, prob, color in zip(names, probs, colors):
                 fpr, tpr, _ = roc_curve_and_score(labels, prob)
                 plt.plot(tpr, tpr/np.sqrt(fpr), color=color, lw=2, label='{}'.format(name))
+
+    # Plotting the line for a random classifier
+    plt.plot(tpr, tpr/np.sqrt(tpr), color='navy', lw=1, linestyle='--', label='Random classification')
 
     # Adding information to the plot
     plt.legend(loc="upper right")
