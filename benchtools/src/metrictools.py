@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
 
-LIST_COLORS = ['darkorange', 'crimson', 'green', 'blue', 'green'
-    , 'red', 'purple', 'pink', 'gray', 'olive', 'cyan', 'indigo'
-    ,'salmon','gold', 'aquamarine', 'bluevioles', 'magenta', 'darkred'
+LIST_COLORS = ['darkorange', 'crimson', 'green', 'blue', 'red'
+    , 'purple', 'pink', 'gray', 'olive', 'cyan', 'indigo','salmon'
+    ,'gold', 'aquamarine', 'bluevioles', 'magenta', 'darkred'
     ,'sandybrown', 'darkseagreen','deepskyblue', 'deeppink']
 
 def roc_curve_and_score(label, pred_proba):
