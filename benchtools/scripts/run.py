@@ -120,12 +120,12 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
             else:
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
-                # Training the model
-                try: model.fit(X_train) # For KMeans which is unsupervised
-                except: model.fit(X_train, y_train)
+            # Training the model
+            try: model.fit(X_train) # For KMeans which is unsupervised
+            except: model.fit(X_train, y_train)
             
-                # Saving into a list
-                models.append((name,model))
+            # Saving into a list
+            models.append((name,model))
 
         # For tensorflow the training is different
         else:
