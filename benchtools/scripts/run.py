@@ -110,11 +110,8 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
 
     for scaler, clf in tqdm(classifiers):
         
-        name = None
-        try: name = clf.__class__.__name__
-        except: pass
-        print(clf, type(name), name)
-
+        name = clf.__class__.__name__
+        
         if name != 'Sequential' :
 
             # Simple pipeline
@@ -135,8 +132,9 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
             name = 'TensorflowClassifier'
             print('Training tensorflow model')
             # Scaling the data
-            X_train = scaler.fit_transform(X_train)
-            X_test = scaler.fit_transform(X_test)
+            # Standarizing the variables
+            X_train[X_train.columns] = scaler.fit_transform(X_train[X_train.columns])
+            X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
             # Getting model
             model = clf
             model.summary()
