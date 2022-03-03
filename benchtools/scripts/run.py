@@ -250,7 +250,7 @@ if RD:
     sample = 'events_anomalydetection.h5'
     path_sample = os.path.join(PATH_RAW,sample)
     print('Building features from the R&D dataset')
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_{}'.format(OUT_NAME), 
+    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_RD_{}'.format(N_EVENTS), 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 else:
@@ -264,7 +264,7 @@ else:
     sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
     path_sample = os.path.join(PATH_RAW,sample)
     print('Building features from the BB{} dataset'.format(flags.box))
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_{}'.format(OUT_NAME), 
+    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_BB{}_{}'.format(flags.box,N_EVENTS), 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 
