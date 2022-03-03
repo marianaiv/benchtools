@@ -193,6 +193,7 @@ def evaluate_pipeline(X_test, y_test, models):
             y_scores = model.predict(X_test)
 
             # Getting the threshold to make class predictions (0 or 1)
+            print(y_scores.shape)
             threshold = optimal_threshold(y_test, y_scores[:,1])
             y_pred = (model.predict(X_test) > threshold).astype("int32")
             clfs.append(classifier(name, y_score[:,1], y_pred, y_test))
