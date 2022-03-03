@@ -154,7 +154,8 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
   
             model.save('../../data/models/tf_model.h5')
 
-
+    print('PRINTING MODELS ==================================')
+    print(models)
     pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
     print('Models saved') 
 
@@ -286,7 +287,6 @@ print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
 models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
-
 print(models)
 
 # Tensorflow algorithm
