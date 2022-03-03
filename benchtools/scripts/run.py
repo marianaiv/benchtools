@@ -218,6 +218,9 @@ def evaluate_pipeline(X_test, y_test, models):
     
     return clfs
 
+
+tf.random.set_seed(125)
+
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
 parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
@@ -289,10 +292,10 @@ X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
 # Scalers and classifiers
-classifiers = [(StandardScaler(), RandomForestClassifier()),
-                (RobustScaler(), GradientBoostingClassifier()),
+classifiers = [(StandardScaler(), RandomForestClassifier(random_state=1)),
+                (RobustScaler(), GradientBoostingClassifier(random_state=4)),
                 (RobustScaler(), QuadraticDiscriminantAnalysis()), 
-                (StandardScaler(), MLPClassifier()),
+                (StandardScaler(), MLPClassifier(random_state=7)),
                 (StandardScaler(), KMeans(n_clusters=2, random_state=15)),
                 (MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]]))
                 ]
@@ -323,7 +326,7 @@ print('COMPARING METRICS')
 names = [clf.name for clf in clfs]
 scores = [clf.score for clf in clfs]
 preds = [clf.pred for clf in clfs]      
-labels = [clf.label for clf in clfs] 
+labels = [clf.label.to_numpy() for clf in clfs] 
 
 print(names)
 
