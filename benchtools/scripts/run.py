@@ -110,9 +110,12 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
 
     for scaler, clf in tqdm(classifiers):
         
-        if clf != TensorflowClassifier(input_shape = [X_train.shape[1]]):
+        print (clf)
+        name = clf.__class__.__name__
+        print(name)
 
-            name = clf.__class__.__name__
+        if name != 'TensorflowClassifier':
+
             # Simple pipeline
             if dimension_reduction is None:
                 model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
