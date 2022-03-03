@@ -113,7 +113,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
         name = None
         try: name = clf.__class__.__name__
         except: pass
-        print(clf, type(name))
+        print(clf, type(name), name)
 
         if name != None :
 
