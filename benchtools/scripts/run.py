@@ -305,5 +305,7 @@ scores = [clf.score for clf in clfs]
 preds = [clf.pred for clf in clfs]      
 labels = [clf.label for clf in clfs] 
 
+print(names)
+
 rej = rejection_plot(names=names, labels=labels, probs=scores)
 plt.savefig('test.png', bbox_inches='tight')
