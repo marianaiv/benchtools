@@ -196,7 +196,7 @@ def merge_files(filename, nbatch, outdir='../data'):
         csv file (oudir/outname.csv)
     """
     # Reading the files
-    df = read_multifiles(filename, nbatch)
+    df = read_multifiles(filename, nbatch, outdir=outdir)
 
     # Saving the dataframe to one csv file
     save_df(filename, outdir, df)
