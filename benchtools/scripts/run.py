@@ -259,7 +259,7 @@ else:
 print('GETTING DATA READY FOR TRAINING')
 
 file_name = 'features_{}'.format(OUT_NAME)
-df = pd.read_csv("..\data\{}.csv".format(file_name))
+df = pd.read_csv("../data/{}.csv".format(file_name))
 
 # Separating characteristics from label
 X, y = separate_data(df, standarize=False)
