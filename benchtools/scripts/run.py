@@ -131,6 +131,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
 
         # For tensorflow the training is different
         else:
+            print('Training tensorflow model')
             # Scaling the data
             X_train = scaler.fit_transform(X_train)
             X_test = scaler.fit_transform(X_test)
@@ -162,8 +163,7 @@ def evaluate_pipeline(X_test, y_test, models):
     clfs = []
     
     for name, model in tqdm(models):
-        
-        print(name)
+    
         '''
         # Simple pipeline
         if dimension_reduction is None:
