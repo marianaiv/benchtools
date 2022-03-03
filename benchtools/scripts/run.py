@@ -142,8 +142,8 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
             # Training the model
-            try: model.fit(X_train) # For KMeans which is unsupervised
-            except: model.fit(X_train, y_train)
+            try: model.fit(X_train, y_train) 
+            except: model.fit(X_train) # For KMeans which is unsupervised
             
             # Saving into a list
             models.append((name,model))
@@ -175,8 +175,6 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
   
             model.save('../../data/models/tf_model.h5')
 
-    print('PRINTING MODELS ==================================')
-    print(models)
     pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
     print('Models saved') 
 
@@ -308,13 +306,10 @@ print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
 models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
-print(models)
 
 # Tensorflow algorithm
 tf_model = load_model('../../data/models/tf_model.h5')
-models.append(('TensorflowClassifier', tf_model))
-
-print(models)
+models.append(('TensorflowClassifier', tf_model)
 
 clfs = evaluate_pipeline(X_test, y_test, models)
 
