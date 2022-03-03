@@ -125,35 +125,17 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_reduction=None):
+def training_pipeline(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=None):
     
     models = []
 
     for scaler, clf in tqdm(classifiers):
         
         name = clf.__class__.__name__
-
-        if name != 'Sequential' :
-
-            # Simple pipeline
-            if dimension_reduction is None:
-                model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
-            else:
-                model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
-
-            # Training the model
-            try: model.fit(X_train, y_train) 
-            except: model.fit(X_train) # For KMeans which is unsupervised
-            
-            # Saving into a list
-            models.append((name,model))
-
+        
         # For tensorflow the training is different
-        else:
-            name = 'TensorflowClassifier'
-            print('Training tensorflow model')
+        if name == 'Sequential' :
             # Scaling the data
-            # Standarizing the variables
             X_train[X_train.columns] = scaler.fit_transform(X_train[X_train.columns])
             X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
             # Getting model
@@ -172,8 +154,22 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
             batch_size=512,
             epochs=200,
             callbacks=[early_stopping])
-  
+            
             model.save('../../data/models/tf_model.h5')
+
+        # For the sklearn algoritms
+        else:
+            # Simple pipeline
+            if dimension_reduction is None:
+                model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
+            else:
+                model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
+
+            # Training the model
+            model.fit(X_train, y_train) 
+            
+            # Saving into a list
+            models.append((name,model))
 
     pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
     print('Models saved') 
@@ -183,14 +179,7 @@ def evaluate_pipeline(X_test, y_test, models):
     clfs = []
     
     for name, model in tqdm(models):
-    
-        '''
-        # Simple pipeline
-        if dimension_reduction is None:
-            model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
-        else:
-            model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
-        '''
+
         if name != 'TensorflowClassifier':
             # Getting the prediction
             y_pred = model.predict(X_test)
@@ -208,7 +197,7 @@ def evaluate_pipeline(X_test, y_test, models):
                 norm = np.linalg.norm(y_score[:,1])
                 clfs.append(classifier(name, 1-y_score[:,1]/norm, y_pred, y_test))
         
-        # For tensorflow the prediction is done differently
+        # For tensorflow the prediction is different
         else:
             y_score = model.predict(X_test)
             # Getting the threshold to make class predictions (0 or 1)
@@ -283,22 +272,21 @@ print('GETTING DATA READY FOR TRAINING')
 
 file_name = 'features_{}'.format(OUT_NAME)
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(file_name)))
-df_sample = df.sample(100000, random_state = 1).drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 
 # Separating characteristics from label
 X, y = separate_data(df_sample, standarize=False)
 # Dropping the mass to make the classification model-fre
-#X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 # Splitting in training and testis sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
 # Scalers and classifiers
-classifiers = [(StandardScaler(), RandomForestClassifier(random_state=1)),
+classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
+                (StandardScaler(), RandomForestClassifier(random_state=1)),
                 (RobustScaler(), GradientBoostingClassifier(random_state=4)),
                 (RobustScaler(), QuadraticDiscriminantAnalysis()), 
                 (StandardScaler(), MLPClassifier(random_state=7)),
-                (StandardScaler(), KMeans(n_clusters=2, random_state=15)),
-                (MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]]))
+                (StandardScaler(), KMeans(n_clusters=2, random_state=15))
                 ]
 
 
@@ -317,17 +305,17 @@ models.append(('TensorflowClassifier', tf_model))
 
 clfs = evaluate_pipeline(X_test, y_test, models)
 
-print('LOADING DATA FROM EXTERNAL ALGORITHMS (soon)')
-
-
-print('COMPARING METRICS')
-
 # Getting the values to plot
 
 names = [clf.name for clf in clfs]
 scores = [clf.score for clf in clfs]
 preds = [clf.pred for clf in clfs]      
 labels = [clf.label.to_numpy() for clf in clfs] 
+
+print('LOADING DATA FROM EXTERNAL ALGORITHMS (soon)')
+
+
+print('COMPARING METRICS')
 
 print(names)
 
