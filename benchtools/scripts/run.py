@@ -290,7 +290,7 @@ models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
 
 # Tensorflow algorithm
 tf_model = load_model('../../data/models/tf_model.h5')
-models.append('TensorflowClassifier', tf_model)
+models.append(('TensorflowClassifier', tf_model))
 
 clfs = evaluate_pipeline(X_test, y_test, models)
 
