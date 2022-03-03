@@ -113,7 +113,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
         
         except: name = 'TensorflowClassifier'
 
-        if name is not 'TensorflowClassifier':
+        if name != 'TensorflowClassifier':
             
             # Simple pipeline
             if dimension_reduction is None:
@@ -170,7 +170,7 @@ def evaluate_pipeline(X_test, y_test, models):
         else:
             model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
         '''
-        if name is not 'TensorflowClassifier':
+        if name != 'TensorflowClassifier':
             # Getting the prediction
             y_pred = model.predict(X_test)
             
