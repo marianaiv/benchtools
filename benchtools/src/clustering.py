@@ -234,4 +234,4 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
         merge_files(outname, nbatch, outdir)
 
         # Deleting the multiple files
-        delete_multifiles(outname, nbatch, outdir = '../data')
+        delete_multifiles(outname, nbatch, outdir)
