@@ -110,11 +110,12 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
 
     for scaler, clf in tqdm(classifiers):
         
-        print (clf)
-        name = clf.__class__.__name__
-        print(name)
+        name = None
+        try: name = clf.__class__.__name__
+        except: pass
+        print(clf, type(name))
 
-        if type(name) != str:
+        if name != None :
 
             # Simple pipeline
             if dimension_reduction is None:
