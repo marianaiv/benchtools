@@ -287,9 +287,13 @@ print('GETTING PREDICTIONS AND SCORES')
 # Sklearn algorithms
 models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
 
+print(models)
+
 # Tensorflow algorithm
 tf_model = load_model('../../data/models/tf_model.h5')
 models.append(('TensorflowClassifier', tf_model))
+
+print(models)
 
 clfs = evaluate_pipeline(X_test, y_test, models)
 
