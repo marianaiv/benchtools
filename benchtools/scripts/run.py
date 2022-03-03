@@ -274,7 +274,7 @@ file_name = 'features_{}'.format(OUT_NAME)
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(file_name)))
 
 # Separating characteristics from label
-X, y = separate_data(df_sample, standarize=False)
+X, y = separate_data(df, standarize=False)
 # Dropping the mass to make the classification model-fre
 X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 # Splitting in training and testis sets
