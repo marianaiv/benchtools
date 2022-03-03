@@ -114,7 +114,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
         name = clf.__class__.__name__
         print(name)
 
-        if name != 'TensorflowClassifier':
+        if type(name) != str:
 
             # Simple pipeline
             if dimension_reduction is None:
