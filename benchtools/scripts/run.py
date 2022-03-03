@@ -223,7 +223,7 @@ TRAINING = flags.training
 
 # If the path does not exists, creates it
 if not os.path.exists(os.path.join('..',PATH_OUT)):
-    os.makedir(os.path.join('..',PATH_OUT))
+    os.makedirs(os.path.join('..',PATH_OUT))
     
 print('BUILDING FEATURES')
 
