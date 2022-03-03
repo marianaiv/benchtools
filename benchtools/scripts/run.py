@@ -24,7 +24,7 @@ from tqdm import tqdm
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
 from math import ceil
-from sklearn.preprocessing import StandarScaler, RobustScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
@@ -267,11 +267,11 @@ X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
 # Scalers and classifiers
-classifiers = [(StandarScaler(), RandomForestClassifier()),
+classifiers = [(StandardScaler(), RandomForestClassifier()),
                 (RobustScaler(), GradientBoostingClassifier()),
                 (RobustScaler(), QuadraticDiscriminantAnalysis()), 
-                (StandarScaler(), MLPClassifier()),
-                (StandarScaler(), KMeans(n_clusters=2, random_state=15)),
+                (StandardScaler(), MLPClassifier()),
+                (StandardScaler(), KMeans(n_clusters=2, random_state=15)),
                 (MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]]))
                 ]
 
