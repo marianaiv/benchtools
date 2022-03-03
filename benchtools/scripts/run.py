@@ -115,7 +115,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
         except: pass
         print(clf, type(name), name)
 
-        if name != None :
+        if name != 'Sequential' :
 
             # Simple pipeline
             if dimension_reduction is None:
