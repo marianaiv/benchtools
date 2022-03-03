@@ -222,8 +222,8 @@ N_BATCH = flags.nbatch
 TRAINING = flags.training
 
 # If the path does not exists, creates it
-if not os.path.exists(os.path.join('..',PATH_OUT)):
-    os.makedirs(os.path.join('..',PATH_OUT))
+if not os.path.exists(PATH_OUT):
+    os.makedirs(PATH_OUT)
     
 print('BUILDING FEATURES')
 
