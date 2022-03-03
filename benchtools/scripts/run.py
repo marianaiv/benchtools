@@ -111,7 +111,7 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
     for scaler, clf in tqdm(classifiers):
         
         name = clf.__class__.__name__
-        
+
         if name != 'Sequential' :
 
             # Simple pipeline
@@ -281,7 +281,7 @@ classifiers = [(StandardScaler(), RandomForestClassifier()),
 
 print('TRAINING ALGORITHMS')
 
-training_pipeline(X_train, X_test, y_train, y_test, classifiers)
+training_pipeline(X_train, y_train, X_test, y_test, classifiers)
 
 print('GETTING PREDICTIONS AND SCORES')
 
