@@ -283,11 +283,12 @@ print('GETTING DATA READY FOR TRAINING')
 
 file_name = 'features_{}'.format(OUT_NAME)
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(file_name)))
+df_sample = df.sample(100000, random_state = 1).drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 
 # Separating characteristics from label
-X, y = separate_data(df, standarize=False)
+X, y = separate_data(df_sample, standarize=False)
 # Dropping the mass to make the classification model-fre
-X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+#X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
 # Splitting in training and testis sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
