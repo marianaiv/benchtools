@@ -150,10 +150,10 @@ def training_pipeline(X_train, y_train, X_test, y_test, classifiers, dimension_r
             epochs=200,
             callbacks=[early_stopping])
   
-            model.save('../data/models/tf_model.h5')
+            model.save('../../data/models/tf_model.h5')
 
 
-    pickle.dump(models, open('../data/models/sklearn_models.sav', 'wb'))
+    pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
     print('Models saved') 
 
 def evaluate_pipeline(X_test, y_test, models):
@@ -200,8 +200,8 @@ def evaluate_pipeline(X_test, y_test, models):
 
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
-parser.add_argument('--dir', type=str, default='../data/', help='Folder containing the input files [Default: ../data]')
-parser.add_argument('--out', type=str, default='../data/output', help='Folder to save output files [Default: ../data/output]')
+parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
+parser.add_argument('--out', type=str, default='../../data/output', help='Folder to save output files [Default: ../../data/output]')
 parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
 parser.add_argument('--name', type=str, default='output', help='Name of the output file')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
@@ -283,10 +283,10 @@ training_pipeline(X_train, X_test, y_train, y_test, classifiers)
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open('../data/models/sklearn_models.sav', 'rb'))
+models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
 
 # Tensorflow algorithm
-tf_model = load_model('../data/models/tf_model.h5')
+tf_model = load_model('../../data/models/tf_model.h5')
 models.append('TensorflowClassifier', tf_model)
 
 clfs = evaluate_pipeline(X_test, y_test, models)
