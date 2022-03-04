@@ -14,7 +14,8 @@ https://zenodo.org/record/4536624
     - Masterkey: https://zenodo.org/record/4536624/files/events_LHCO2020_BlackBox1.masterkey?download=1
 '''
 
-### Pre-processing ###
+### Libraries ### 
+from importlib.resources import path
 import os
 import argparse
 import pickle
@@ -22,14 +23,12 @@ import os.path
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from benchtools.src.clustering import build_features
-from benchtools.src.datatools import separate_data
 from math import ceil
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-
 import matplotlib.pyplot as plt
+
 
 # Importing the classifiers
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -37,7 +36,7 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 from sklearn.cluster import KMeans
 
-# tensorflow
+# Tensorflow
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -45,6 +44,9 @@ from tensorflow.keras import callbacks
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Model
 
+# Benchtools
+from benchtools.src.clustering import build_features
+from benchtools.src.datatools import separate_data
 from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, precision_recall_plot
 
 class classifier:
@@ -55,6 +57,7 @@ class classifier:
         self.label = label
     #def numeric_metrics()
         
+    # Methods for getting each plot    
     def rejection(self):
         rejection_plot(self.name, self.label, self.score)
         plt.show()
@@ -125,7 +128,7 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=None):
+def training(X_train, X_test, y_train, y_test, classifiers, path, dimension_reduction=None):
     
     models = []
 
@@ -155,7 +158,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=
             epochs=200,
             callbacks=[early_stopping])
             
-            model.save('../../data/models/tf_model.h5')
+            model.save(os.path.join(path,'tf_model.h5'))
 
         # For the sklearn algoritms
         else:
@@ -171,7 +174,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=
             # Saving into a list
             models.append((name,model))
 
-    pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
+    pickle.dump(models, open(os.path.join(path,'sklearn_models.sav'), 'wb'))
     print('Models saved') 
 
 def evaluate(X_test, y_test, models):
@@ -213,7 +216,8 @@ tf.random.set_seed(125)
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
 parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
-parser.add_argument('--out', type=str, default='../../data/output/', help='Folder to save output files [Default: ../../data/output]')
+parser.add_argument('--out', type=str, default='../../logs/', help='Folder to save output files [Default: ../../logs]')
+parser.add_argument('--ext_clf', type=str, default=None, help='Path for the list of external classifiers to compare [Default: None]')
 parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
 parser.add_argument('--name', type=str, default='output', help='Name of the output file')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
@@ -225,7 +229,8 @@ parser.add_argument('--training', type=bool, default=True, help='To train the al
 flags = parser.parse_args()
 
 PATH_RAW = flags.dir
-PATH_OUT = flags.out
+PATH_LOG = flags.out
+PATH_EXT_CLF = flags.ext_clf
 OUT_NAME = flags.name
 RD = flags.RD
 N_EVENTS = flags.nevents
@@ -233,10 +238,14 @@ ALL_DATA = flags.all_data
 N_BATCH = flags.nbatch
 TRAINING = flags.training
 
-# If the path does not exists, creates it
+# Path for saving all files created in one run
+PATH_OUT = os.path.join(PATH_LOG,OUT_NAME)
+
+# If the out path does not exists, creates it
 if not os.path.exists(PATH_OUT):
-    os.makedirs(PATH_OUT)
-    
+    # Creates the path plus a directory for the results
+    os.makedirs(os.path.join(PATH_OUT,'results'))
+
 print('BUILDING FEATURES')
 
 if RD:
@@ -270,40 +279,49 @@ else:
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 
-print('GETTING DATA READY FOR TRAINING')
+print('READING THE DATA')
 
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
 
-# Separating characteristics from label
-X, y = separate_data(df, standarize=False)
-# Dropping the mass to make the classification model-fre
-X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
-# Splitting in training and testis sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
+if TRAINING is True:
+    # Separating characteristics from label
+    X, y = separate_data(df, standarize=False)
+    # Dropping the mass to make the classification model-fre
+    X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+    # Splitting in training and testis sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
-# Scalers and classifiers
-classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
-                (StandardScaler(), RandomForestClassifier(random_state=1)),
-                (RobustScaler(), GradientBoostingClassifier(random_state=4)),
-                (RobustScaler(), QuadraticDiscriminantAnalysis()), 
-                (StandardScaler(), MLPClassifier(random_state=7)),
-                (StandardScaler(), KMeans(n_clusters=2, random_state=15))
-                ]
+else: 
+    # Separating characteristics from label
+    X_test, y_test = separate_data(df, standarize=False)
+    # Dropping the mass to make the classification model-fre
+    X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+
+if TRAINING is True:
+    # Scalers and classifiers
+    classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
+                    (StandardScaler(), RandomForestClassifier(random_state=1)),
+                    (RobustScaler(), GradientBoostingClassifier(random_state=4)),
+                    (RobustScaler(), QuadraticDiscriminantAnalysis()), 
+                    (StandardScaler(), MLPClassifier(random_state=7)),
+                    (StandardScaler(), KMeans(n_clusters=2, random_state=15))
+                    ]
 
 
-print('TRAINING ALGORITHMS')
+    print('TRAINING ALGORITHMS')
 
-training(X_train, X_test, y_train, y_test, classifiers)
+    training(X_train, X_test, y_train, y_test, classifiers, PATH_OUT)
 
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
+models = pickle.load(open(os.path.join(PATH_OUT,'sklearn_models.sav', 'rb')))
 
 # Tensorflow algorithm
-tf_model = load_model('../../data/models/tf_model.h5')
+tf_model = load_model(os.path.join(PATH_OUT,'tf_model.h5'))
 models.append(('TensorflowClassifier', tf_model))
 
+# Evaluation
 clfs = evaluate(X_test, y_test, models)
 
 # Getting the values to plot
@@ -313,12 +331,37 @@ scores = [clf.score for clf in clfs]
 preds = [clf.pred for clf in clfs]      
 labels = [clf.label.to_numpy() for clf in clfs] 
 
-print('LOADING DATA FROM EXTERNAL ALGORITHMS (soon)')
+# Adding algorithms trained and evaluated externaly
+if PATH_EXT_CLF != None:
+    print('LOADING DATA FROM EXTERNAL ALGORITHMS')
 
+    with open('{}'.format(PATH_EXT_CLF)) as f:
+        external_clfs = [line.rstrip('\n') for line in f]
+    
+    for file in external_clfs:
+        clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
+        names.append(clf.name)
+        scores.append(clf.scores)
+        preds.append(clf.pred)
+        labels.append(clf.label)
 
 print('COMPARING METRICS')
 
-print(names)
+print('Classifiers to compare:')
+for name in names:
+    print(name)
 
-rej = rejection_plot(names=names, labels=labels, probs=scores)
-plt.savefig('test_{}.png'.format(OUT_NAME), bbox_inches='tight')
+# A directory for saving the results
+path_results = os.path.join(PATH_OUT,'results')
+
+rejection_plot(names=names, labels=labels, probs=scores)
+plt.savefig(os.path.join(path_results,'rejection.png'), bbox_inches='tight')
+
+inverse_roc_plot(names=names, labels=labels, probs=scores)
+plt.savefig(os.path.join(path_results,'inverse_roc.png'), bbox_inches='tight')
+
+significance_plot(names=names, labels=labels, probs=scores)
+plt.savefig(os.path.join(path_results,'significance.png'), bbox_inches='tight')
+
+precision_recall_plot(names=names, labels=labels, probs=scores)
+plt.savefig(os.path.join(path_results,'precision-recall.png'), bbox_inches='tight')
