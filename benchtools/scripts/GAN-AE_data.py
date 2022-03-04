@@ -33,14 +33,16 @@ dist_sig['label']=1
 # Getting together signal with background
 df_sig = pd.concat([dist_bkg, dist_sig])
 
-# Calculating predictions with the better threshold
-threshold = optimal_threshold(label, score)
-df_sig['y_pred']=(df_sig['y_score'] >= threshold).astype(float)
-
 # Setting the variables for the classfier object
 name = 'GAN-AE'
 label = np.array(df_sig.loc[:,'label'])
 score = np.array(df_sig.loc[:,'y_score'])
+
+# Calculating predictions with the better threshold
+threshold = optimal_threshold(label, score)
+df_sig['y_pred']=(df_sig['y_score'] >= threshold).astype(float)
+
+# Setting the prediction variable
 pred = df_sig.loc[:,'y_pred']
 
 # Creating classifier object
