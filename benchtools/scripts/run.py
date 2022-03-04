@@ -217,9 +217,9 @@ tf.random.set_seed(125)
 parser = argparse.ArgumentParser()
 parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
 parser.add_argument('--out', type=str, default='../../logs/', help='Folder to save output files [Default: ../../logs]')
-parser.add_argument('--ext_clf', type=str, default=None, help='Path for the list of external classifiers to compare [Default: None]')
+parser.add_argument('--ext_clf', type=str, default=None, help='Path for the list of external classifiers to compare. Have to be on --dir if added [Default: None]')
 parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
-parser.add_argument('--name', type=str, default='output', help='Name of the output file')
+parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
 parser.add_argument('--RD',  type=bool, default=True ,help='Use RD data set [default: False')
 parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
@@ -243,7 +243,7 @@ PATH_OUT = os.path.join(PATH_LOG,OUT_NAME)
 
 # If the out path does not exists, creates it
 if not os.path.exists(PATH_OUT):
-    # Creates the path plus a directory for the results
+    # Creates the path plus a folder for the results
     os.makedirs(os.path.join(PATH_OUT,'results'))
 
 print('BUILDING FEATURES')
@@ -259,6 +259,7 @@ if RD:
     sample = 'events_anomalydetection.h5'
     path_sample = os.path.join(PATH_RAW,sample)
     filename = 'features_RD_{}'.format(N_EVENTS)
+
     print('Building features from the R&D dataset')
     build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
@@ -274,12 +275,13 @@ else:
     sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
     path_sample = os.path.join(PATH_RAW,sample)
     filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
+
     print('Building features from the BB{} dataset'.format(flags.box))
     build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 
-print('READING THE DATA')
+print('PREPARING THE DATA')
 
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
 
