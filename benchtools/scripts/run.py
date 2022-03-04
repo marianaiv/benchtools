@@ -166,10 +166,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
             # Training the model  
-            try: 
-                model.fit(X_train, y_train) 
-            except: 
-                model.fit(X_train) # For KMeans which is unsupervised
+            model.fit(X_train, y_train) 
             
             # Saving into a list
             models.append((name,model))
@@ -324,4 +321,4 @@ print('COMPARING METRICS')
 print(names)
 
 rej = rejection_plot(names=names, labels=labels, probs=scores)
-plt.savefig('test.png', bbox_inches='tight')
+plt.savefig('test_{}.png'.format(OUT_NAME), bbox_inches='tight')
