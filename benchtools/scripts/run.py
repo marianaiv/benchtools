@@ -165,8 +165,11 @@ def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=
             else:
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
-            # Training the model
-            model.fit(X_train, y_train) 
+            # Training the model  
+            try: 
+                model.fit(X_train, y_train) 
+            except: 
+                model.fit(X_train) # For KMeans which is unsupervised
             
             # Saving into a list
             models.append((name,model))
