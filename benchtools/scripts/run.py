@@ -293,7 +293,7 @@ classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_s
 
 print('TRAINING ALGORITHMS')
 
-training_pipeline(X_train, y_train, X_test, y_test, classifiers)
+training_pipeline(X_train, X_test, y_train, y_test, classifiers)
 
 print('GETTING PREDICTIONS AND SCORES')
 
