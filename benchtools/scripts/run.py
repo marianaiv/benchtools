@@ -270,7 +270,7 @@ else:
 
 print('GETTING DATA READY FOR TRAINING')
 
-file_name = 'features_{}'.format(OUT_NAME)
+file_name = 'features_{}'.format(N_EVENTS)
 df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(file_name)))
 
 # Separating characteristics from label
