@@ -273,12 +273,14 @@ else:
 
     # Building the features
     sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
+    label = 'events_LHCO2020_BlackBox{}.masterkey'.format(flags.box)
     path_sample = os.path.join(PATH_RAW,sample)
+    path_label= os.path.join(PATH_RAW,label)
     filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
 
     print('Building features from the BB{} dataset'.format(flags.box))
     build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                path_label=None, outdir=PATH_OUT, chunksize=chunksize)
+                path_label=path_label, outdir=PATH_OUT, chunksize=chunksize)
 
 
 print('PREPARING THE DATA')
