@@ -1,5 +1,5 @@
 '''
-This is a script to convert the results of UCluster into the format needed for the benchmarking with run.py
+Script to convert the results of UCluster into the format needed for the benchmarking with run.py
 '''
 
 import h5py
