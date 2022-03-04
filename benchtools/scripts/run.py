@@ -249,8 +249,9 @@ if RD:
     # Building the features
     sample = 'events_anomalydetection.h5'
     path_sample = os.path.join(PATH_RAW,sample)
+    filename = 'features_RD_{}'.format(N_EVENTS)
     print('Building features from the R&D dataset')
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_RD_{}'.format(N_EVENTS), 
+    build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 else:
@@ -263,15 +264,15 @@ else:
     # Building the features
     sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
     path_sample = os.path.join(PATH_RAW,sample)
+    filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
     print('Building features from the BB{} dataset'.format(flags.box))
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname='features_BB{}_{}'.format(flags.box,N_EVENTS), 
+    build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                 path_label=None, outdir=PATH_OUT, chunksize=chunksize)
 
 
 print('GETTING DATA READY FOR TRAINING')
 
-file_name = 'features_{}'.format(N_EVENTS)
-df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(file_name)))
+df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
 
 # Separating characteristics from label
 X, y = separate_data(df, standarize=False)
