@@ -125,7 +125,7 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training_pipeline(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=None):
+def training(X_train, X_test, y_train, y_test, classifiers, dimension_reduction=None):
     
     models = []
 
@@ -174,7 +174,7 @@ def training_pipeline(X_train, X_test, y_train, y_test, classifiers, dimension_r
     pickle.dump(models, open('../../data/models/sklearn_models.sav', 'wb'))
     print('Models saved') 
 
-def evaluate_pipeline(X_test, y_test, models):
+def evaluate(X_test, y_test, models):
    # To save the output
     clfs = []
     
@@ -293,7 +293,7 @@ classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_s
 
 print('TRAINING ALGORITHMS')
 
-training_pipeline(X_train, X_test, y_train, y_test, classifiers)
+training(X_train, X_test, y_train, y_test, classifiers)
 
 print('GETTING PREDICTIONS AND SCORES')
 
@@ -304,7 +304,7 @@ models = pickle.load(open('../../data/models/sklearn_models.sav', 'rb'))
 tf_model = load_model('../../data/models/tf_model.h5')
 models.append(('TensorflowClassifier', tf_model))
 
-clfs = evaluate_pipeline(X_test, y_test, models)
+clfs = evaluate(X_test, y_test, models)
 
 # Getting the values to plot
 
