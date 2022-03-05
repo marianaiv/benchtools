@@ -378,15 +378,19 @@ path_results = os.path.join(PATH_OUT,'results')
 
 rejection_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'rejection.png'), bbox_inches='tight')
+plt.clf()
 
 inverse_roc_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'inverse_roc.png'), bbox_inches='tight')
+plt.clf()
 
 significance_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'significance.png'), bbox_inches='tight')
+plt.clf()
 
 precision_recall_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'precision-recall.png'), bbox_inches='tight')
+plt.clf()
 
 # Metrics
 log = compare_metrics(clfs)
@@ -397,3 +401,4 @@ color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
 for metric,color in zip(metrics,color_list):
     compare_metrics_plot(log, metric, color=color)
     plt.savefig(os.path.join(path_results,'{}_barh.png'.format(metric)), bbox_inches='tight')
+    plt.clf()
