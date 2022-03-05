@@ -335,7 +335,7 @@ if TRAINING is True:
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open(os.path.join(PATH_OUT,'sklearn_models.sav', 'rb')))
+models = pickle.load(open(os.path.join(PATH_OUT,'sklearn_models.sav'), 'rb'))
 
 # Tensorflow algorithm
 tf_model = load_model(os.path.join(PATH_OUT,'tf_model.h5'))
