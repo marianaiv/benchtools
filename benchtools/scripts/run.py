@@ -23,6 +23,7 @@ import os.path
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+from tabulate import tabulate
 from math import ceil
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -374,7 +375,7 @@ for name in names:
 # A directory for saving the results
 path_results = os.path.join(PATH_OUT,'results')
 
-# Plots
+# Plotting metrics
 
 rejection_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'rejection.png'), bbox_inches='tight')
@@ -395,8 +396,14 @@ plt.clf()
 # Metrics
 log = compare_metrics(clfs)
 
+# Printing values to text
+with open(os.path.join(path_results,'metrics.txt'), "a") as f:
+    print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
+
+# Getting the name of the metrics
 metrics = log.columns.tolist()
 
+# Plotting the metrics
 color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
 for metric,color in zip(metrics,color_list):
     compare_metrics_plot(log, metric, color=color)
