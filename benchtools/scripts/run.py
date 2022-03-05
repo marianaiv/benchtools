@@ -396,3 +396,4 @@ metrics = log.columns.tolist()
 color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
 for metric,color in zip(metrics,color_list):
     compare_metrics_plot(log, metric, color=color)
+    plt.savefig(os.path.join(path_results,'{}_barh.png'.format(metric)), bbox_inches='tight')
