@@ -29,7 +29,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 
-
 # Importing the classifiers
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
@@ -44,10 +43,13 @@ from tensorflow.keras import callbacks
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Model
 
+# Importing the metrics
+from sklearn.metrics import precision_score, log_loss, recall_score, f1_score, balanced_accuracy_score
+
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
-from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, precision_recall_plot
+from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, precision_recall_plot, compare_metrics, compare_metrics_plot
 
 class classifier:
     def __init__(self, name, score, pred, label):
@@ -55,7 +57,21 @@ class classifier:
         self.score = score
         self.pred = pred       
         self.label = label
-    #def numeric_metrics()
+    
+    def precision(self):
+        return precision_score(self.label, self.pred)
+        
+    def recall(self):
+        return recall_score(self.label, self.pred)
+
+    def f1_score(self):
+        return f1_score(self.label, self.pred)
+
+    def balanced_accuracy(self):
+        return balanced_accuracy_score(self.label, self.pred)
+
+    def log_loss(self):
+        return log_loss(self.label, self.score)
         
     # Methods for getting each plot    
     def rejection(self):
@@ -358,6 +374,8 @@ for name in names:
 # A directory for saving the results
 path_results = os.path.join(PATH_OUT,'results')
 
+# Plots
+
 rejection_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'rejection.png'), bbox_inches='tight')
 
@@ -369,3 +387,12 @@ plt.savefig(os.path.join(path_results,'significance.png'), bbox_inches='tight')
 
 precision_recall_plot(names=names, labels=labels, probs=scores)
 plt.savefig(os.path.join(path_results,'precision-recall.png'), bbox_inches='tight')
+
+# Metrics
+log = compare_metrics(clfs)
+
+metrics = log.columns.tolist()
+
+color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
+for metric,color in zip(metrics,color_list):
+    compare_metrics_plot(log, metric, color=color)
