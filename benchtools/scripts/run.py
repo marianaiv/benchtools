@@ -145,7 +145,7 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training(X_train, X_test, y_train, y_test, classifiers, path, dimension_reduction=None):
+def training(X_train, X_test, y_train, y_test, classifiers, path, name, dimension_reduction=None):
     
     models = []
 
@@ -175,7 +175,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, dimension_redu
             epochs=200,
             callbacks=[early_stopping])
             
-            model.save(os.path.join(path,'tf_model.h5'))
+            model.save(os.path.join(path,'tf_model_{}.h5'.format(name)))
 
         # For the sklearn algoritms
         else:
@@ -191,7 +191,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, dimension_redu
             # Saving into a list
             models.append((name,model))
 
-    pickle.dump(models, open(os.path.join(path,'sklearn_models.sav'), 'wb'))
+    pickle.dump(models, open(os.path.join(path,'sklearn_models_{}.sav'.format(name)), 'wb'))
     print('Models saved') 
 
 def evaluate(X_test, y_test, models):
@@ -260,8 +260,7 @@ PATH_OUT = os.path.join(PATH_LOG,OUT_NAME)
 
 # If the out path does not exists, creates it
 if not os.path.exists(PATH_OUT):
-    # Creates the path plus a folder for the results
-    os.makedirs(os.path.join(PATH_OUT,'results'))
+    os.makedirs(PATH_OUT)
 
 print('BUILDING FEATURES')
 
@@ -331,15 +330,15 @@ if TRAINING is True:
 
     print('TRAINING ALGORITHMS')
 
-    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW)
+    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, OUT_NAME)
 
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models.sav'), 'rb'))
+models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(OUT_NAME)), 'rb'))
 
 # Tensorflow algorithm
-tf_model = load_model(os.path.join(PATH_RAW,'tf_model.h5'))
+tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(OUT_NAME)))
 models.append(('TensorflowClassifier', tf_model))
 
 # Evaluation
@@ -372,32 +371,30 @@ print('Classifiers to compare:')
 for name in names:
     print(name)
 
-# A directory for saving the results
-path_results = os.path.join(PATH_OUT,'results')
 
 # Plotting metrics
 
 rejection_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(path_results,'rejection.png'), bbox_inches='tight')
+plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
 plt.clf()
 
 inverse_roc_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(path_results,'inverse_roc.png'), bbox_inches='tight')
+plt.savefig(os.path.join(PATH_OUT,'inverse_roc.png'), bbox_inches='tight')
 plt.clf()
 
 significance_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(path_results,'significance.png'), bbox_inches='tight')
+plt.savefig(os.path.join(PATH_OUT,'significance.png'), bbox_inches='tight')
 plt.clf()
 
 precision_recall_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(path_results,'precision-recall.png'), bbox_inches='tight')
+plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
 plt.clf()
 
 # Metrics
 log = compare_metrics(clfs)
 
 # Printing values to text
-with open(os.path.join(path_results,'metrics.txt'), "a") as f:
+with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
     print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
 
 # Getting the name of the metrics
@@ -407,5 +404,5 @@ metrics = log.columns.tolist()
 color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
 for metric,color in zip(metrics,color_list):
     compare_metrics_plot(log, metric, color=color)
-    plt.savefig(os.path.join(path_results,'{}_barh.png'.format(metric)), bbox_inches='tight')
+    plt.savefig(os.path.join(PATH_OUT,'{}_barh.png'.format(metric)), bbox_inches='tight')
     plt.clf()
