@@ -145,7 +145,7 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training(X_train, X_test, y_train, y_test, classifiers, path, name, dimension_reduction=None):
+def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
     
     models = []
 
@@ -175,7 +175,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, name, dimensio
             epochs=200,
             callbacks=[early_stopping])
             
-            model.save(os.path.join(path,'tf_model_{}.h5'.format(name)))
+            model.save(os.path.join(path,'tf_model_{}.h5'.format(models_name)))
 
         # For the sklearn algoritms
         else:
@@ -191,7 +191,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, name, dimensio
             # Saving into a list
             models.append((name,model))
 
-    pickle.dump(models, open(os.path.join(path,'sklearn_models_{}.sav'.format(name)), 'wb'))
+    pickle.dump(models, open(os.path.join(path,'sklearn_models_{}.sav'.format(models_name)), 'wb'))
     print('Models saved') 
 
 def evaluate(X_test, y_test, models):
