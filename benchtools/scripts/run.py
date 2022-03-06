@@ -358,9 +358,11 @@ labels = [clf.label.to_numpy() for clf in clfs]
 if PATH_EXT_CLF != None:
     print('LOADING DATA FROM EXTERNAL ALGORITHMS')
 
+    # Reading the list of files
     with open('{}'.format(PATH_EXT_CLF)) as f:
         external_clfs = [line.rstrip('\n') for line in f]
     
+    # Adding the information to the existing lists
     for file in external_clfs:
         clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
         names.append(clf.name)
