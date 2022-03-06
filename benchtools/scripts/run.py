@@ -279,7 +279,7 @@ if RD:
 
     print('Building features from the R&D dataset')
     build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                path_label=None, outdir=PATH_OUT, chunksize=chunksize)
+                path_label=None, outdir=PATH_RAW, chunksize=chunksize)
 
 else:
     # Getting the size for each chunk
@@ -297,7 +297,7 @@ else:
 
     print('Building features from the BB{} dataset'.format(flags.box))
     build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                path_label=path_label, outdir=PATH_OUT, chunksize=chunksize)
+                path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
 
 
 print('PREPARING THE DATA')
@@ -331,15 +331,15 @@ if TRAINING is True:
 
     print('TRAINING ALGORITHMS')
 
-    training(X_train, X_test, y_train, y_test, classifiers, PATH_OUT)
+    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW)
 
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open(os.path.join(PATH_OUT,'sklearn_models.sav'), 'rb'))
+models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models.sav'), 'rb'))
 
 # Tensorflow algorithm
-tf_model = load_model(os.path.join(PATH_OUT,'tf_model.h5'))
+tf_model = load_model(os.path.join(PATH_RAW,'tf_model.h5'))
 models.append(('TensorflowClassifier', tf_model))
 
 # Evaluation
