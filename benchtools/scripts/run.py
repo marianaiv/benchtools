@@ -396,7 +396,7 @@ plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
 plt.clf()
 
 # Metrics
-log = compare_metrics(clfs)
+log = compare_metrics(names, scores, preds, labels)
 
 # Printing values to text
 with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
