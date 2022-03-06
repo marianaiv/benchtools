@@ -310,7 +310,7 @@ if TRAINING is True:
     # Separating characteristics from label
     X, y = separate_data(df, standarize=False)
     # Dropping the mass to make the classification model-fre
-    X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+    X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
     # Splitting in training and testis sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
@@ -318,7 +318,7 @@ else:
     # Separating characteristics from label
     X_test, y_test = separate_data(df, standarize=False)
     # Dropping the mass to make the classification model-fre
-    X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1)
+    X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
 
 if TRAINING is True:
     # Scalers and classifiers
