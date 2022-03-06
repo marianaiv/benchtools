@@ -237,11 +237,13 @@ parser.add_argument('--out', type=str, default='../../logs/', help='Folder to sa
 parser.add_argument('--ext_clf', type=str, default=None, help='Path for the list of external classifiers to compare. Have to be on --dir if added [Default: None]')
 parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
 parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
+parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
 parser.add_argument('--RD',  type=bool, default=True ,help='Use RD data set [default: False')
 parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
 parser.add_argument('--all_data', type=bool, default=False, help='Use the complete dataset [default: False]')
 parser.add_argument('--training', type=bool, default=True, help='To train the algorithms [default: True]')
+
 
 flags = parser.parse_args()
 
@@ -249,6 +251,7 @@ PATH_RAW = flags.dir
 PATH_LOG = flags.out
 PATH_EXT_CLF = flags.ext_clf
 OUT_NAME = flags.name
+NAME_MODELS = flags.models
 RD = flags.RD
 N_EVENTS = flags.nevents
 ALL_DATA = flags.all_data
@@ -330,15 +333,15 @@ if TRAINING is True:
 
     print('TRAINING ALGORITHMS')
 
-    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, OUT_NAME)
+    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
 
 print('GETTING PREDICTIONS AND SCORES')
 
 # Sklearn algorithms
-models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(OUT_NAME)), 'rb'))
+models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(NAME_MODELS)), 'rb'))
 
 # Tensorflow algorithm
-tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(OUT_NAME)))
+tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
 models.append(('TensorflowClassifier', tf_model))
 
 # Evaluation
