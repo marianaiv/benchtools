@@ -306,7 +306,7 @@ def main():
 
     print('PREPARING THE DATA')
 
-    df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
+    df = pd.read_csv(os.path.join(PATH_RAW, '{}.csv'.format(filename)))
 
     if TRAINING or RD:
         # Separating characteristics from label
