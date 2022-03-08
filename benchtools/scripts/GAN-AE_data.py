@@ -52,7 +52,7 @@ class classifier:
 
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
-parser.add_argument('--path', type=str, default='..\data', help='Path for the file with the data to transform [default: ..\data]')
+parser.add_argument('--path', type=str, default='../data', help='Path for the file with the data to transform [default: ../data]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
 parser.add_argument('--RD',  default=False, action='store_true',help='Use RD data set [default: False]')
 
