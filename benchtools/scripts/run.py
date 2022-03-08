@@ -228,186 +228,188 @@ def evaluate(X_test, y_test, models):
     return clfs
 
 
-tf.random.set_seed(125)
+if __name__=='__main__':
+        
+    tf.random.set_seed(125)
 
-# DEFAULT SETTINGS
-parser = argparse.ArgumentParser()
-parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
-parser.add_argument('--out', type=str, default='../../logs/', help='Folder to save output files [Default: ../../logs]')
-parser.add_argument('--ext_clf', type=str, default=None, help='Path for the txt with the list of external classifiers to compare. The files in the list have to be in --dir if added [Default: None]')
-parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
-parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
-parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
-parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
-parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
-parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
-parser.add_argument('--all_data', type=bool, default=False, help='Use the complete dataset [default: False]')
-parser.add_argument('--training', type=bool, default=True, help='To train the algorithms [default: True]')
+    # DEFAULT SETTINGS
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
+    parser.add_argument('--out', type=str, default='../../logs/', help='Folder to save output files [Default: ../../logs]')
+    parser.add_argument('--ext_clf', type=str, default=None, help='Path for the txt with the list of external classifiers to compare. The files in the list have to be in --dir if added [Default: None]')
+    parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
+    parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
+    parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
+    parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
+    parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
+    parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
+    parser.add_argument('--all_data', type=bool, default=False, help='Use the complete dataset [default: False]')
+    parser.add_argument('--training', type=bool, default=True, help='To train the algorithms [default: True]')
 
 
-flags = parser.parse_args()
+    flags = parser.parse_args()
 
-PATH_RAW = flags.dir
-PATH_LOG = flags.out
-PATH_EXT_CLF = flags.ext_clf
-OUT_NAME = flags.name
-NAME_MODELS = flags.models
-RD = flags.RD
-N_EVENTS = flags.nevents
-ALL_DATA = flags.all_data
-N_BATCH = flags.nbatch
-TRAINING = flags.training
+    PATH_RAW = flags.dir
+    PATH_LOG = flags.out
+    PATH_EXT_CLF = flags.ext_clf
+    OUT_NAME = flags.name
+    NAME_MODELS = flags.models
+    RD = flags.RD
+    N_EVENTS = flags.nevents
+    ALL_DATA = flags.all_data
+    N_BATCH = flags.nbatch
+    TRAINING = flags.training
 
-# Path for saving all files created in one run
-PATH_OUT = os.path.join(PATH_LOG,OUT_NAME)
+    # Path for saving all files created in one run
+    PATH_OUT = os.path.join(PATH_LOG,OUT_NAME)
 
-# If the out path does not exists, creates it
-if not os.path.exists(PATH_OUT):
-    os.makedirs(PATH_OUT)
+    # If the out path does not exists, creates it
+    if not os.path.exists(PATH_OUT):
+        os.makedirs(PATH_OUT)
 
-print('BUILDING FEATURES')
+    print('BUILDING FEATURES')
 
-if RD:
-    # Getting the size for each chunk
-    if ALL_DATA:
-        chunksize = ceil(1100000/N_BATCH)
+    if RD:
+        # Getting the size for each chunk
+        if ALL_DATA:
+            chunksize = ceil(1100000/N_BATCH)
+        else:
+            chunksize = ceil(N_EVENTS/N_BATCH)
+
+        # Building the features
+        sample = 'events_anomalydetection.h5'
+        path_sample = os.path.join(PATH_RAW,sample)
+        filename = 'features_RD_{}'.format(N_EVENTS)
+
+        print('Building features from the R&D dataset')
+        build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
+                    path_label=None, outdir=PATH_RAW, chunksize=chunksize)
+
     else:
-        chunksize = ceil(N_EVENTS/N_BATCH)
+        # Getting the size for each chunk
+        if ALL_DATA:
+            chunksize = ceil(1000000/N_BATCH) 
+        else:
+            chunksize = ceil(N_EVENTS/N_BATCH)
 
-    # Building the features
-    sample = 'events_anomalydetection.h5'
-    path_sample = os.path.join(PATH_RAW,sample)
-    filename = 'features_RD_{}'.format(N_EVENTS)
+        # Building the features
+        sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
+        label = 'events_LHCO2020_BlackBox{}.masterkey'.format(flags.box)
+        path_sample = os.path.join(PATH_RAW,sample)
+        path_label= os.path.join(PATH_RAW,label)
+        filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
 
-    print('Building features from the R&D dataset')
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                path_label=None, outdir=PATH_RAW, chunksize=chunksize)
-
-else:
-    # Getting the size for each chunk
-    if ALL_DATA:
-        chunksize = ceil(1000000/N_BATCH) 
-    else:
-        chunksize = ceil(N_EVENTS/N_BATCH)
-
-    # Building the features
-    sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
-    label = 'events_LHCO2020_BlackBox{}.masterkey'.format(flags.box)
-    path_sample = os.path.join(PATH_RAW,sample)
-    path_label= os.path.join(PATH_RAW,label)
-    filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
-
-    print('Building features from the BB{} dataset'.format(flags.box))
-    build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
+        print('Building features from the BB{} dataset'.format(flags.box))
+        build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
+                    path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
 
 
-print('PREPARING THE DATA')
+    print('PREPARING THE DATA')
 
-df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
+    df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
 
-if TRAINING is True:
-    # Separating characteristics from label
-    X, y = separate_data(df, standarize=False)
-    # Dropping the mass to make the classification model-fre
-    X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
-    # Splitting in training and testis sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
+    if TRAINING is True:
+        # Separating characteristics from label
+        X, y = separate_data(df, standarize=False)
+        # Dropping the mass to make the classification model-fre
+        X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
+        # Splitting in training and testis sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
-else: 
-    # Separating characteristics from label
-    X_test, y_test = separate_data(df, standarize=False)
-    # Dropping the mass to make the classification model-fre
-    X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
+    else: 
+        # Separating characteristics from label
+        X_test, y_test = separate_data(df, standarize=False)
+        # Dropping the mass to make the classification model-fre
+        X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
 
-if TRAINING is True:
-    # Scalers and classifiers
-    classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
-                    (StandardScaler(), RandomForestClassifier(random_state=1)),
-                    (RobustScaler(), GradientBoostingClassifier(random_state=4)),
-                    (RobustScaler(), QuadraticDiscriminantAnalysis()), 
-                    (StandardScaler(), MLPClassifier(random_state=7)),
-                    (StandardScaler(), KMeans(n_clusters=2, random_state=15))
-                    ]
-
-
-    print('TRAINING ALGORITHMS')
-
-    training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
-
-print('GETTING PREDICTIONS AND SCORES')
-
-# Sklearn algorithms
-models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(NAME_MODELS)), 'rb'))
-
-# Tensorflow algorithm
-tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
-models.append(('TensorflowClassifier', tf_model))
-
-# Evaluation
-clfs = evaluate(X_test, y_test, models)
-
-# Getting the values to plot
-
-names = [clf.name for clf in clfs]
-scores = [clf.score for clf in clfs]
-preds = [clf.pred for clf in clfs]      
-labels = [clf.label.to_numpy() for clf in clfs] 
-
-# Adding algorithms trained and evaluated externaly
-if PATH_EXT_CLF != None:
-    print('LOADING DATA FROM EXTERNAL ALGORITHMS')
-
-    # Reading the list of files
-    with open('{}'.format(PATH_EXT_CLF)) as f:
-        external_clfs = [line.rstrip('\n') for line in f]
-    
-    # Adding the information to the existing lists
-    for file in external_clfs:
-        clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
-        names.append(clf.name)
-        scores.append(clf.scores)
-        preds.append(clf.pred)
-        labels.append(clf.label)
-
-print('COMPARING METRICS')
-
-print('Classifiers to compare:')
-for name in names:
-    print(name)
+    if TRAINING is True:
+        # Scalers and classifiers
+        classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
+                        (StandardScaler(), RandomForestClassifier(random_state=1)),
+                        (RobustScaler(), GradientBoostingClassifier(random_state=4)),
+                        (RobustScaler(), QuadraticDiscriminantAnalysis()), 
+                        (StandardScaler(), MLPClassifier(random_state=7)),
+                        (StandardScaler(), KMeans(n_clusters=2, random_state=15))
+                        ]
 
 
-# Plotting metrics
+        print('TRAINING ALGORITHMS')
 
-rejection_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
-plt.clf()
+        training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
 
-inverse_roc_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(PATH_OUT,'inverse_roc.png'), bbox_inches='tight')
-plt.clf()
+    print('GETTING PREDICTIONS AND SCORES')
 
-significance_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(PATH_OUT,'significance.png'), bbox_inches='tight')
-plt.clf()
+    # Sklearn algorithms
+    models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(NAME_MODELS)), 'rb'))
 
-precision_recall_plot(names=names, labels=labels, probs=scores)
-plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
-plt.clf()
+    # Tensorflow algorithm
+    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
+    models.append(('TensorflowClassifier', tf_model))
 
-# Metrics
-log = compare_metrics(names, scores, preds, labels)
+    # Evaluation
+    clfs = evaluate(X_test, y_test, models)
 
-# Printing values to text
-with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
-    print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
+    # Getting the values to plot
 
-# Getting the name of the metrics
-metrics = log.columns.tolist()
+    names = [clf.name for clf in clfs]
+    scores = [clf.score for clf in clfs]
+    preds = [clf.pred for clf in clfs]      
+    labels = [clf.label.to_numpy() for clf in clfs] 
 
-# Plotting the metrics
-color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
-for metric,color in zip(metrics,color_list):
-    compare_metrics_plot(log, metric, color=color)
-    plt.savefig(os.path.join(PATH_OUT,'{}_barh.png'.format(metric)), bbox_inches='tight')
+    # Adding algorithms trained and evaluated externaly
+    if PATH_EXT_CLF != None:
+        print('LOADING DATA FROM EXTERNAL ALGORITHMS')
+
+        # Reading the list of files
+        with open('{}'.format(PATH_EXT_CLF)) as f:
+            external_clfs = [line.rstrip('\n') for line in f]
+        
+        # Adding the information to the existing lists
+        for file in external_clfs:
+            clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
+            names.append(clf.name)
+            scores.append(clf.scores)
+            preds.append(clf.pred)
+            labels.append(clf.label)
+
+    print('COMPARING METRICS')
+
+    print('Classifiers to compare:')
+    for name in names:
+        print(name)
+
+
+    # Plotting metrics
+
+    rejection_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
     plt.clf()
+
+    inverse_roc_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'inverse_roc.png'), bbox_inches='tight')
+    plt.clf()
+
+    significance_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'significance.png'), bbox_inches='tight')
+    plt.clf()
+
+    precision_recall_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
+    plt.clf()
+
+    # Metrics
+    log = compare_metrics(names, scores, preds, labels)
+
+    # Printing values to text
+    with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
+        print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
+
+    # Getting the name of the metrics
+    metrics = log.columns.tolist()
+
+    # Plotting the metrics
+    color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
+    for metric,color in zip(metrics,color_list):
+        compare_metrics_plot(log, metric, color=color)
+        plt.savefig(os.path.join(PATH_OUT,'{}_barh.png'.format(metric)), bbox_inches='tight')
+        plt.clf()
