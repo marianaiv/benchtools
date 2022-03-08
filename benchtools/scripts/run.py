@@ -308,7 +308,7 @@ def main():
 
     df = pd.read_csv(os.path.join(PATH_OUT, '{}.csv'.format(filename)))
 
-    if TRAINING is True:
+    if TRAINING or RD:
         # Separating characteristics from label
         X, y = separate_data(df, standarize=False)
         # Dropping the mass to make the classification model-fre
@@ -316,7 +316,7 @@ def main():
         # Splitting in training and testis sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
-    else: 
+    else:  
         # Separating characteristics from label
         X_test, y_test = separate_data(df, standarize=False)
         # Dropping the mass to make the classification model-fre
