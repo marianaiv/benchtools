@@ -50,7 +50,8 @@ from sklearn.metrics import precision_score, log_loss, recall_score, f1_score, b
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
-from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, precision_recall_plot, compare_metrics, compare_metrics_plot
+from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
+     precision_recall_plot, compare_metrics, compare_metrics_plot
 
 class classifier:
     def __init__(self, name, score, pred, label):
