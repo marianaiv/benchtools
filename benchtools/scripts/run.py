@@ -228,8 +228,7 @@ def evaluate(X_test, y_test, models):
     return clfs
 
 
-if __name__=='__main__':
-        
+def main():   
     tf.random.set_seed(125)
 
     # DEFAULT SETTINGS
@@ -413,3 +412,6 @@ if __name__=='__main__':
         compare_metrics_plot(log, metric, color=color)
         plt.savefig(os.path.join(PATH_OUT,'{}_barh.png'.format(metric)), bbox_inches='tight')
         plt.clf()
+
+if __name__ == "__main__":
+    main()
