@@ -239,7 +239,7 @@ parser.add_argument('--nbatch', type=int, default=10, help='Number batches [defa
 parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
 parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
-parser.add_argument('--RD',  type=bool, default=True ,help='Use RD data set [default: False')
+parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
 parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
 parser.add_argument('--all_data', type=bool, default=False, help='Use the complete dataset [default: False]')
 parser.add_argument('--training', type=bool, default=True, help='To train the algorithms [default: True]')
