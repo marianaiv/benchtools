@@ -368,7 +368,7 @@ def main():
         for file in external_clfs:
             clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
             names.append(clf.name)
-            scores.append(clf.scores)
+            scores.append(clf.score)
             preds.append(clf.pred)
             labels.append(clf.label)
 
