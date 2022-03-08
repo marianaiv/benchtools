@@ -272,9 +272,9 @@ def main():
     if RD:
         # Getting the size for each chunk
         if ALL_DATA:
-            chunksize = ceil(1100000/N_BATCH)
-        else:
-            chunksize = ceil(N_EVENTS/N_BATCH)
+            N_EVENTS = 1100000
+   
+        chunksize = ceil(N_EVENTS/N_BATCH)
 
         # Building the features
         sample = 'events_anomalydetection.h5'
@@ -288,9 +288,9 @@ def main():
     else:
         # Getting the size for each chunk
         if ALL_DATA:
-            chunksize = ceil(1000000/N_BATCH) 
-        else:
-            chunksize = ceil(N_EVENTS/N_BATCH)
+            N_EVENTS = 1000000 
+
+        chunksize = ceil(N_EVENTS/N_BATCH)
 
         # Building the features
         sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
