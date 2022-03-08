@@ -7,7 +7,7 @@ import pickle
 import argparse
 import numpy as np
 import pandas as pd
-from run import classifier
+from benchtools.scripts.run import classifier
 from benchtools.src.metrictools import optimal_threshold
 
 # DEFAULT SETTINGS
