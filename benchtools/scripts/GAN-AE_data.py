@@ -14,7 +14,7 @@ from benchtools.src.metrictools import optimal_threshold
 parser = argparse.ArgumentParser()
 parser.add_argument('--path', type=str, default='..\data', help='Path for the file with the data to transform [default: ..\data]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
-parser.add_argument('--RD',  type=bool, default=True ,help='If is from the RD dataser [default: False')
+parser.add_argument('--RD',  default=False, action='store_true',help='Use RD data set [default: False]')
 
 flags = parser.parse_args()
 
