@@ -18,7 +18,7 @@ setuptools.setup(
     ],
     packages=["benchtools"
             , "benchtools.src"
-#           , "benchtools.scripts"
+           , "benchtools.scripts"
 ]
 
 )
