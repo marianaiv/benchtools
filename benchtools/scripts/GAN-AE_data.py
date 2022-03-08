@@ -1,7 +1,7 @@
 '''
 Script to convert the results of GAN-AE into the format needed for the benchmarking with run.py
 '''
-
+import os
 import h5py
 import pickle
 import argparse
@@ -12,19 +12,24 @@ from benchtools.src.metrictools import optimal_threshold
 
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
-parser.add_argument('--path', type=str, help='Path for the file with the data to transform')
+parser.add_argument('--path', type=str, default='..\data', help='Path for the file with the data to transform [default: ..\data]')
 parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
 parser.add_argument('--RD',  type=bool, default=True ,help='If is from the RD dataser [default: False')
 
 flags = parser.parse_args()
 
-DATA = flags.path #rd_dist_full.h5
+DATA = flags.path 
 NBOX = flags.box
 RD = flags.RD
 
+if RD:
+    sample = 'RnD_distances.h5'
+else:
+    sample = 'BB{}_distances.h5'.format(NBOX)
+
 # Reading the distances
-dist_bkg = pd.DataFrame(np.array(h5py.File('..\data\RnD_distances.h5', 'r')['bkg']), columns=['y_score'])
-dist_sig = pd.DataFrame(np.array(h5py.File('..\data\RnD_distances.h5', 'r')['sig1']), columns=['y_score'])
+dist_bkg = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['bkg']), columns=['y_score'])
+dist_sig = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['sig1']), columns=['y_score'])
 
 # Adding labels, 0 for background and 1 for signal
 dist_bkg['label']=0
