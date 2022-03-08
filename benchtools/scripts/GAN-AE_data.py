@@ -64,12 +64,15 @@ RD = flags.RD
 
 if RD:
     sample = 'RnD_distances.h5'
+    # Reading the distances
+    dist_bkg = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['bkg']), columns=['y_score'])
+    dist_sig = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['sig1']), columns=['y_score'])
 else:
     sample = 'BB{}_distances.h5'.format(NBOX)
+    dist_bkg = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['bkg']), columns=['y_score'])
+    dist_sig = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['sig']), columns=['y_score'])
 
-# Reading the distances
-dist_bkg = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['bkg']), columns=['y_score'])
-dist_sig = pd.DataFrame(np.array(h5py.File(os.path.join(DATA,sample), 'r')['sig1']), columns=['y_score'])
+
 
 # Adding labels, 0 for background and 1 for signal
 dist_bkg['label']=0
