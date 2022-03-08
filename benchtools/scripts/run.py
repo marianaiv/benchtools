@@ -244,7 +244,7 @@ def main():
     parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
     parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
     parser.add_argument('--all_data', type=bool, default=False, help='Use the complete dataset [default: False]')
-    parser.add_argument('--training', type=bool, default=True, help='To train the algorithms [default: True]')
+    parser.add_argument('--training', type=bool, default=False, action='store_true', help='To train the algorithms [default: False]')
 
 
     flags = parser.parse_args()
