@@ -54,7 +54,9 @@ pred = df_sig.loc[:,'y_pred']
 clf = classifier(name, score, pred, label)
 
 # Saving
-if RD is True: filename = '{}_{}.sav'.format(name,RD)
-else: filename = '{}_BB{}.sav'.format(name,NBOX)
+if RD: 
+    filename = '{}_RD.sav'.format(name)
+else: 
+    filename = '{}_BB{}.sav'.format(name,NBOX)
 
-pickle.dump(clf, open('../../data/models/{}'.format(filename), 'wb'))
+pickle.dump(clf, open('../../data/{}'.format(filename), 'wb'))
