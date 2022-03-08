@@ -322,7 +322,7 @@ def main():
         # Dropping the mass to make the classification model-fre
         X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
 
-    if TRAINING is True:
+    if TRAINING:
         # Scalers and classifiers
         classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
                         (StandardScaler(), RandomForestClassifier(random_state=1)),
