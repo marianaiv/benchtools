@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
+from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score, balanced_accuracy_score
 
 LIST_COLORS = ['darkorange', 'crimson', 'green', 'blue', 'purple'
     , 'pink', 'gray', 'olive', 'cyan', 'red', 'indigo','salmon'
@@ -506,3 +506,78 @@ def performance_metrics(name, label, pred_label, pred_prob=None):
     print(classification_report(label, pred_label, target_names=['background','signal']))
 
     return log_entry
+
+def compare_metrics(names, scores, preds, labels):
+    '''Calculates the balanced accuracy, precision, f1 score, recall 
+    and logaritmic loss for multiple classifiers.
+
+    Parameters
+    ----------
+    names: list
+        List of the names of the classifiers
+    
+    scores: list
+        List of the probabilities or scores of each classifier
+    
+    preds: list
+        List of the predictions of each classifier
+
+    labels: list
+        List of the true labels of the events
+
+    Returns
+    ------
+    log: DataFrame
+        With the name of the classifier as index, balanced accuracy, 
+        precision, f1 score, recall and logaritmic loss
+    '''
+
+    log_dict = {}
+    
+    for name, score, pred, label in zip(names, scores, preds, labels):
+
+        # Calculating metrics
+        ba = balanced_accuracy_score(label, pred)
+        precision = precision_score(label, pred)
+        f1 = f1_score(label, pred)
+        recall = recall_score(label, pred)
+        ll = log_loss(label, score)
+
+        # Inserting into a dictionary
+        log_dict[name]=[ba, precision, f1, recall, ll]
+    
+    # Converting it to a dataframe
+    columns_name = {0:'Balanced accuracy', 1:'Precision', 2:'F1 score', 3: 'Recall',
+              4:'Log loss'}
+    log = pd.DataFrame.from_dict(log_dict, orient='index').rename(columns=columns_name)
+    log.index.name = 'Classifier'
+    
+    return log
+
+def compare_metrics_plot(log, variable, color=None):
+    '''Horizontal bar plot from a dataframe given a 
+    name of one column as variable.
+
+    Parameters
+    ----------
+    log: DataFrame
+        DataFrame with multiple columns and rows
+    
+    variable: str
+        Name of the column to plot
+
+    color: str
+        Color for the plot
+
+    Returns
+    ------
+    ax: 
+        Axis of the plot
+    '''
+    if color is None:
+        ax = log.loc[:,variable].plot.barh(figsize=(6,3), title=variable, width=0.4)
+    else:
+        ax = log.loc[:,variable].plot.barh(figsize=(6,3), title=variable, width=0.4, color=color)
+    return ax
+
+
