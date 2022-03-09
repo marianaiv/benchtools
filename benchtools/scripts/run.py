@@ -149,7 +149,8 @@ def TensorflowClassifier(input_shape):
 
 def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
     
-    models = []
+    #models = []
+    names = []
 
     for scaler, clf in tqdm(classifiers):
         
@@ -191,9 +192,14 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             model.fit(X_train, y_train) 
             
             # Saving into a list
-            models.append((name,model))
+            #models.append((name,model))
+            dump(model, os.path.join(path,'sklearn_model_{}_{}.joblib'.format(models_name,name)))
+            names.append(name)
+            dump(names, os.path.join(path,'sklearn_model_{}_names.joblib'.format(models_name)))
 
-    dump(models, os.path.join(path,'sklearn_models_{}.joblib'.format(models_name)))
+    
+
+
     print('Models saved') 
 
 def evaluate(X_test, y_test, models, train=False):
@@ -347,7 +353,11 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
 
     # Sklearn algorithms
-    models = load(os.path.join(PATH_RAW,'sklearn_models_{}.joblib'.format(NAME_MODELS)))
+    sklear_names = load(os.path.join(path,'sklearn_model_{}_names.joblib'.format(NAME_MODELS)))
+    models = []
+    for name in sklear_names:
+        clf = load(os.path.join(path,'sklearn_model_{}_{}.joblib'.format(NAME_MODELS,name)))
+        models.append(clf)
 
     # Tensorflow algorithm
     tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
