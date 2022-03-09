@@ -149,8 +149,7 @@ def TensorflowClassifier(input_shape):
 
 def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
     
-    #models = []
-    names = []
+    models = []
 
     for scaler, clf in tqdm(classifiers):
         
@@ -192,13 +191,12 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             model.fit(X_train, y_train) 
             
             # Saving into a list
-            #models.append((name,model))
-            dump(model, os.path.join(path,'sklearn_model_{}_{}.joblib'.format(models_name,name)))
-            names.append(name)
-            
-        
-    dump(names, os.path.join(path,'sklearn_model_{}_names.joblib'.format(models_name)))
+            models.append((name,model))
 
+    # Saving into a pickle file
+    with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
+        for model in models:
+            pickle.dump(model, f)
     print('Models saved') 
 
 def evaluate(X_test, y_test, models, train=False):
@@ -352,11 +350,13 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
 
     # Sklearn algorithms
-    sklearn_names = load(os.path.join(PATH_RAW,'sklearn_model_{}_names.joblib'.format(NAME_MODELS)))
     models = []
-    for name in sklearn_names:
-        clf = load(os.path.join(PATH_RAW,'sklearn_model_{}_{}.joblib'.format(NAME_MODELS,name)))
-        models.append(clf)
+    with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
+        while True:
+            try:
+                models.append(pickle.load(f))
+            except EOFError:
+                break
 
     # Tensorflow algorithm
     tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
