@@ -18,13 +18,13 @@ https://zenodo.org/record/4536624
 from importlib.resources import path
 import os
 import argparse
-import pickle
 import os.path 
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 from tabulate import tabulate
 from math import ceil
+from joblib import dump, load
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -192,10 +192,10 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             # Saving into a list
             models.append((name,model))
 
-    pickle.dump(models, open(os.path.join(path,'sklearn_models_{}.sav'.format(models_name)), 'wb'))
+    dump(models, os.path.join(path,'sklearn_models_{}.joblib'.format(models_name)))
     print('Models saved') 
 
-def evaluate(X_test, y_test, models):
+def evaluate(X_test, y_test, models, train=False):
    # To save the output
     clfs = []
     
@@ -220,6 +220,12 @@ def evaluate(X_test, y_test, models):
         
         # For tensorflow the prediction is different
         else:
+            # If there is no training the data won't be scalated
+            # So we add it here
+            if train is False: 
+                scaler = MinMaxScaler(feature_range=(-1,1))
+                X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
+                
             y_score = model.predict(X_test)
             # Getting the threshold to make class predictions (0 or 1)
             threshold = optimal_threshold(y_test, y_score)
@@ -340,7 +346,7 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
 
     # Sklearn algorithms
-    models = pickle.load(open(os.path.join(PATH_RAW,'sklearn_models_{}.sav'.format(NAME_MODELS)), 'rb'))
+    models = load(os.path.join(PATH_RAW,'sklearn_models_{}.joblib'.format(NAME_MODELS)))
 
     # Tensorflow algorithm
     tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
