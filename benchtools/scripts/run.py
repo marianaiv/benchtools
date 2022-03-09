@@ -195,10 +195,9 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             #models.append((name,model))
             dump(model, os.path.join(path,'sklearn_model_{}_{}.joblib'.format(models_name,name)))
             names.append(name)
-            dump(names, os.path.join(path,'sklearn_model_{}_names.joblib'.format(models_name)))
-
-    
-
+            
+        
+    dump(names, os.path.join(path,'sklearn_model_{}_names.joblib'.format(models_name)))
 
     print('Models saved') 
 
