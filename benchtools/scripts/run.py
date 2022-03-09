@@ -225,7 +225,7 @@ def evaluate(X_test, y_test, models, train=False):
             if train is False: 
                 scaler = MinMaxScaler(feature_range=(-1,1))
                 X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
-                
+
             y_score = model.predict(X_test)
             # Getting the threshold to make class predictions (0 or 1)
             threshold = optimal_threshold(y_test, y_score)
@@ -353,7 +353,7 @@ def main():
     models.append(('TensorflowClassifier', tf_model))
 
     # Evaluation
-    clfs = evaluate(X_test, y_test, models)
+    clfs = evaluate(X_test, y_test, models,train=TRAINING)
 
     # Getting the values to plot
 
@@ -386,6 +386,8 @@ def main():
 
 
     # Plotting metrics
+    # Legend size
+    plt.rc('legend',fontsize='x-small')
 
     rejection_plot(names=names, labels=labels, probs=scores)
     plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
