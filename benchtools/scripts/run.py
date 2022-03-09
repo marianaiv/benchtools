@@ -323,13 +323,13 @@ def main():
         X, y = separate_data(df, standarize=False)
         # Dropping the mass to make the classification model-fre
         X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
-        # Splitting in training and testis sets
+        # Splitting in training and testing sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
     else:  
         # Separating characteristics from label
         X_test, y_test = separate_data(df, standarize=False)
-        # Dropping the mass to make the classification model-fre
+        # Dropping the mass to make the classification model-free
         X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
 
     if TRAINING:
@@ -419,7 +419,7 @@ def main():
     log = compare_metrics(names, scores, preds, labels)
 
     # Printing values to text
-    with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
+    with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME).), "w") as f:
         print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
 
     # Getting the name of the metrics
