@@ -353,10 +353,10 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
 
     # Sklearn algorithms
-    sklear_names = load(os.path.join(path,'sklearn_model_{}_names.joblib'.format(NAME_MODELS)))
+    sklearn_names = load(os.path.join(PATH_RAW,'sklearn_model_{}_names.joblib'.format(NAME_MODELS)))
     models = []
-    for name in sklear_names:
-        clf = load(os.path.join(path,'sklearn_model_{}_{}.joblib'.format(NAME_MODELS,name)))
+    for name in sklearn_names:
+        clf = load(os.path.join(PATH_RAW,'sklearn_model_{}_{}.joblib'.format(NAME_MODELS,name)))
         models.append(clf)
 
     # Tensorflow algorithm
