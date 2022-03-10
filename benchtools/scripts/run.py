@@ -109,27 +109,7 @@ def TensorflowClassifier(input_shape):
 
     # Creating the model
     # Here are the layers with batch normalization, the drop out rate and the activations
-    '''
-    model = keras.Sequential([
-        layers.BatchNormalization(input_shape=input_shape),
-        layers.Dense(512, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(256, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(128, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(256, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(512, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(1, activation='sigmoid'),
-    ])
-    '''
+    
     model = keras.Sequential([
     layers.BatchNormalization(input_shape=input_shape),
     layers.Dense(512, activation='relu'),
