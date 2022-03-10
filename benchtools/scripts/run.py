@@ -94,6 +94,18 @@ class classifier:
         plt.show()
 
 def TensorflowClassifier(input_shape):
+    """Returns a simple sequential model for binary classification.
+
+    Parameters
+    ----------
+    input_shape : int
+        Number of initial features
+
+    Returns
+    ------
+    model: 
+        Tensorflow sequential model
+    """
 
     # Creating the model
     # Here are the layers with batch normalization, the drop out rate and the activations
@@ -148,7 +160,40 @@ def TensorflowClassifier(input_shape):
     return model
 
 def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
+    """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
+
+    Parameters
+    ----------
+    X_train : DataFrame
+        Features for training
     
+    X_test : DataFrame
+        Features for testing
+
+    y_train : Series
+        True label of the train features
+
+    y_test: Series
+        True label of the test features
+
+    classifiers: list
+        List of tuples (data scaler, classifier)
+
+    path: str
+        Path to save the models
+
+    models_name: str
+        Name to add to the saved files
+
+    dimension_reduction : function
+        Function to use for reducing dimensions. Default is None
+
+    Returns
+    ------
+    File 
+        h5 and joblib files. Saved trained models
+    """
+
     models = []
 
     for scaler, clf in tqdm(classifiers):
@@ -200,6 +245,30 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
     print('Models saved') 
 
 def evaluate(X_test, y_test, models, train=False):
+    """Get predictions and scores for multiple sklearn binary classification 
+    algorithms and a tensorflow sequential model.
+
+    Parameters
+    ----------
+
+    X_test : DataFrame
+        Features for testing
+
+    y_test: Series
+        True label of the test features
+
+    models : list
+        List of tuples (name, trained classifier)
+
+    train : bool
+        If the model was trained in the current run. Defaul is False
+
+    Returns
+    ------
+    clfs :  list
+        List of classifier objects
+    """
+    
    # To save the output
     clfs = []
     
@@ -276,7 +345,8 @@ def main():
     # If the out path does not exists, creates it
     if not os.path.exists(PATH_OUT):
         os.makedirs(PATH_OUT)
-
+    
+    
     print('BUILDING FEATURES')
 
     if RD:
@@ -313,9 +383,9 @@ def main():
         build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                     path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
 
-
+    
     print('PREPARING THE DATA')
-
+    
     df = pd.read_csv(os.path.join(PATH_RAW, '{}.csv'.format(filename)))
 
     if TRAINING or RD:
@@ -342,13 +412,14 @@ def main():
                         (StandardScaler(), KMeans(n_clusters=2, random_state=15))
                         ]
 
-
+        
         print('TRAINING ALGORITHMS')
-
+        
         training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
 
+    
     print('GETTING PREDICTIONS AND SCORES')
-
+   
     # Sklearn algorithms
     models = []
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
@@ -374,6 +445,8 @@ def main():
 
     # Adding algorithms trained and evaluated externaly
     if PATH_EXT_CLF != None:
+
+        
         print('LOADING DATA FROM EXTERNAL ALGORITHMS')
 
         # Reading the list of files
@@ -387,6 +460,7 @@ def main():
             scores.append(clf.score)
             preds.append(clf.pred)
             labels.append(clf.label)
+
 
     print('COMPARING METRICS')
 
@@ -415,11 +489,11 @@ def main():
     plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
     plt.clf()
 
-    # Metrics
+    # Numeric metrics
     log = compare_metrics(names, scores, preds, labels)
 
     # Printing values to text
-    with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME).), "w") as f:
+    with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME)), "w") as f:
         print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
 
     # Getting the name of the metrics
