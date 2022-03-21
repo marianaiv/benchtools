@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
-from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score
+from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve, precision_score, log_loss, recall_score, classification_report, f1_score, average_precision_score, balanced_accuracy_score
 
 LIST_COLORS = ['darkorange', 'crimson', 'green', 'blue', 'purple'
     , 'pink', 'gray', 'olive', 'cyan', 'red', 'indigo','salmon'
@@ -506,3 +506,171 @@ def performance_metrics(name, label, pred_label, pred_prob=None):
     print(classification_report(label, pred_label, target_names=['background','signal']))
 
     return log_entry
+
+def compare_metrics(names, scores, preds, labels):
+    '''Calculates the balanced accuracy, precision, f1 score, recall 
+    and logaritmic loss for multiple classifiers.
+
+    Parameters
+    ----------
+    names: list
+        List of the names of the classifiers
+    
+    scores: list
+        List of the probabilities or scores of each classifier
+    
+    preds: list
+        List of the predictions of each classifier
+
+    labels: list
+        List of the true labels of the events
+
+    Returns
+    ------
+    log: DataFrame
+        With the name of the classifier as index, balanced accuracy, 
+        precision, f1 score, recall and logaritmic loss
+    '''
+
+    log_dict = {}
+    
+    for name, score, pred, label in zip(names, scores, preds, labels):
+
+        # Calculating metrics
+        ba = balanced_accuracy_score(label, pred)
+        precision = precision_score(label, pred)
+        f1 = f1_score(label, pred)
+        recall = recall_score(label, pred)
+        ll = log_loss(label, score)
+
+        # Inserting into a dictionary
+        log_dict[name]=[ba, precision, f1, recall, ll]
+    
+    # Converting it to a dataframe
+    columns_name = {0:'Balanced accuracy', 1:'Precision', 2:'F1 score', 3: 'Recall',
+              4:'Log loss'}
+    log = pd.DataFrame.from_dict(log_dict, orient='index').rename(columns=columns_name)
+    log.index.name = 'Classifier'
+    
+    return log
+
+def compare_metrics_plot(log, variable, color=None):
+    '''Horizontal bar plot from a dataframe given a 
+    name of one column as variable.
+
+    Parameters
+    ----------
+    log: DataFrame
+        DataFrame with multiple columns and rows
+    
+    variable: str
+        Name of the column to plot
+
+    color: str
+        Color for the plot
+
+    Returns
+    ------
+    ax: 
+        Axis of the plot
+    '''
+    if color is None:
+        ax = log.loc[:,variable].plot.barh(figsize=(6,3), title=variable, width=0.4)
+    else:
+        ax = log.loc[:,variable].plot.barh(figsize=(6,3), title=variable, width=0.4, color=color)
+    return ax
+class classifier:
+    """
+    A class used to represent an classifiers
+
+    ...
+
+    Attributes
+    ----------
+    name : str
+        Name of the classifier
+    score : ndarray
+        Score or probability given by the classifier
+    pred : ndarray
+        Predicted label by the classifier
+    label : ndarray
+        True labels
+
+    Methods
+    -------
+    precision()
+        Returns the precision of the classification
+    recall()
+        Returns the recall of the classification
+    f1_score()
+        Returns the f1 score of the classification
+    balanced_accuracy()
+        Returns the balanced accuracy of the classification
+    log_loss()
+        Returns the logarithmic loss of the classification
+    roc()
+        Returns the ROC plot of the classification
+    rejection()
+        Returns the rejection plot of the classification
+    inverse_roc()
+        Returns the inverse ROC plot of the classification
+    significance()
+        Returns the significance improvement plot of the classification
+    precision_recall()
+        Returns the precision-recall plot of the classification
+    """
+    def __init__(self, name, score, pred, label):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the classifier
+        score : ndarray
+            Score or probability given by the classifier
+        pred : ndarray
+            Predicted label by the classifier
+        label : ndarray
+            True labels
+        """
+        self.name = name
+        self.score = score
+        self.pred = pred       
+        self.label = label
+
+    # Methods for getting each metric
+    
+    def precision(self):
+        return precision_score(self.label, self.pred)
+        
+    def recall(self):
+        return recall_score(self.label, self.pred)
+
+    def f1_score(self):
+        return f1_score(self.label, self.pred)
+
+    def balanced_accuracy(self):
+        return balanced_accuracy_score(self.label, self.pred)
+
+    def log_loss(self):
+        return log_loss(self.label, self.score)
+        
+    # Methods for getting each plot   
+    def roc(self):
+        roc_plot(self.name, self.label, self.score)
+        plt.show()
+
+    def rejection(self):
+        rejection_plot(self.name, self.label, self.score)
+        plt.show()
+        
+    def inverse_roc(self):
+        inverse_roc_plot(self.name, self.label, self.score)
+        plt.show()
+    
+    def significance(self):
+        significance_plot(self.name, self.label, self.score)
+        plt.show()
+        
+    def precision_recall(self):
+        precision_recall_plot(self.name, self.label, self.score)
+        plt.show()
