@@ -45,53 +45,11 @@ from tensorflow.keras import callbacks
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Model
 
-# Importing the metrics
-from sklearn.metrics import precision_score, log_loss, recall_score, f1_score, balanced_accuracy_score
-
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
 from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
-     precision_recall_plot, compare_metrics, compare_metrics_plot
-
-class classifier:
-    def __init__(self, name, score, pred, label):
-        self.name = name
-        self.score = score
-        self.pred = pred       
-        self.label = label
-    
-    def precision(self):
-        return precision_score(self.label, self.pred)
-        
-    def recall(self):
-        return recall_score(self.label, self.pred)
-
-    def f1_score(self):
-        return f1_score(self.label, self.pred)
-
-    def balanced_accuracy(self):
-        return balanced_accuracy_score(self.label, self.pred)
-
-    def log_loss(self):
-        return log_loss(self.label, self.score)
-        
-    # Methods for getting each plot    
-    def rejection(self):
-        rejection_plot(self.name, self.label, self.score)
-        plt.show()
-        
-    def inverse_roc(self):
-        inverse_roc_plot(self.name, self.label, self.score)
-        plt.show()
-    
-    def significance(self):
-        significance_plot(self.name, self.label, self.score)
-        plt.show()
-        
-    def precision_recall(self):
-        precision_recall_plot(self.name, self.label, self.score)
-        plt.show()
+     precision_recall_plot, compare_metrics, compare_metrics_plot, classifier
 
 def TensorflowClassifier(input_shape):
     """Returns a simple sequential model for binary classification.
@@ -213,10 +171,10 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
             # Training the model  
-            model.fit(X_train, y_train) 
+            fit = model.fit(X_train, y_train) 
             
             # Saving into a list
-            models.append((name,model))
+            models.append((name,fit))
 
     # Saving into a pickle file
     with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
