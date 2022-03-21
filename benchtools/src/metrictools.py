@@ -579,5 +579,98 @@ def compare_metrics_plot(log, variable, color=None):
     else:
         ax = log.loc[:,variable].plot.barh(figsize=(6,3), title=variable, width=0.4, color=color)
     return ax
+class classifier:
+    """
+    A class used to represent an classifiers
 
+    ...
 
+    Attributes
+    ----------
+    name : str
+        Name of the classifier
+    score : ndarray
+        Score or probability given by the classifier
+    pred : ndarray
+        Predicted label by the classifier
+    label : ndarray
+        True labels
+
+    Methods
+    -------
+    precision()
+        Returns the precision of the classification
+    recall()
+        Returns the recall of the classification
+    f1_score()
+        Returns the f1 score of the classification
+    balanced_accuracy()
+        Returns the balanced accuracy of the classification
+    log_loss()
+        Returns the logarithmic loss of the classification
+    roc()
+        Returns the ROC plot of the classification
+    rejection()
+        Returns the rejection plot of the classification
+    inverse_roc()
+        Returns the inverse ROC plot of the classification
+    significance()
+        Returns the significance improvement plot of the classification
+    precision_recall()
+        Returns the precision-recall plot of the classification
+    """
+    def __init__(self, name, score, pred, label):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the classifier
+        score : ndarray
+            Score or probability given by the classifier
+        pred : ndarray
+            Predicted label by the classifier
+        label : ndarray
+            True labels
+        """
+        self.name = name
+        self.score = score
+        self.pred = pred       
+        self.label = label
+
+    # Methods for getting each metric
+    
+    def precision(self):
+        return precision_score(self.label, self.pred)
+        
+    def recall(self):
+        return recall_score(self.label, self.pred)
+
+    def f1_score(self):
+        return f1_score(self.label, self.pred)
+
+    def balanced_accuracy(self):
+        return balanced_accuracy_score(self.label, self.pred)
+
+    def log_loss(self):
+        return log_loss(self.label, self.score)
+        
+    # Methods for getting each plot   
+    def roc(self):
+        roc_plot(self.name, self.label, self.score)
+        plt.show()
+
+    def rejection(self):
+        rejection_plot(self.name, self.label, self.score)
+        plt.show()
+        
+    def inverse_roc(self):
+        inverse_roc_plot(self.name, self.label, self.score)
+        plt.show()
+    
+    def significance(self):
+        significance_plot(self.name, self.label, self.score)
+        plt.show()
+        
+    def precision_recall(self):
+        precision_recall_plot(self.name, self.label, self.score)
+        plt.show()

@@ -45,79 +45,29 @@ from tensorflow.keras import callbacks
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Model
 
-# Importing the metrics
-from sklearn.metrics import precision_score, log_loss, recall_score, f1_score, balanced_accuracy_score
-
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
 from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
-     precision_recall_plot, compare_metrics, compare_metrics_plot
-
-class classifier:
-    def __init__(self, name, score, pred, label):
-        self.name = name
-        self.score = score
-        self.pred = pred       
-        self.label = label
-    
-    def precision(self):
-        return precision_score(self.label, self.pred)
-        
-    def recall(self):
-        return recall_score(self.label, self.pred)
-
-    def f1_score(self):
-        return f1_score(self.label, self.pred)
-
-    def balanced_accuracy(self):
-        return balanced_accuracy_score(self.label, self.pred)
-
-    def log_loss(self):
-        return log_loss(self.label, self.score)
-        
-    # Methods for getting each plot    
-    def rejection(self):
-        rejection_plot(self.name, self.label, self.score)
-        plt.show()
-        
-    def inverse_roc(self):
-        inverse_roc_plot(self.name, self.label, self.score)
-        plt.show()
-    
-    def significance(self):
-        significance_plot(self.name, self.label, self.score)
-        plt.show()
-        
-    def precision_recall(self):
-        precision_recall_plot(self.name, self.label, self.score)
-        plt.show()
+     precision_recall_plot, compare_metrics, compare_metrics_plot, classifier
 
 def TensorflowClassifier(input_shape):
+    """Returns a simple sequential model for binary classification.
+
+    Parameters
+    ----------
+    input_shape : int
+        Number of initial features
+
+    Returns
+    ------
+    model: 
+        Tensorflow sequential model
+    """
 
     # Creating the model
     # Here are the layers with batch normalization, the drop out rate and the activations
-    '''
-    model = keras.Sequential([
-        layers.BatchNormalization(input_shape=input_shape),
-        layers.Dense(512, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(256, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(128, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(256, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(512, activation='relu'),   
-        layers.BatchNormalization(),
-        layers.Dropout(0.3),
-        layers.Dense(1, activation='sigmoid'),
-    ])
-    '''
+    
     model = keras.Sequential([
     layers.BatchNormalization(input_shape=input_shape),
     layers.Dense(512, activation='relu'),
@@ -148,7 +98,40 @@ def TensorflowClassifier(input_shape):
     return model
 
 def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
+    """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
+
+    Parameters
+    ----------
+    X_train : DataFrame
+        Features for training
     
+    X_test : DataFrame
+        Features for testing
+
+    y_train : Series
+        True label of the train features
+
+    y_test: Series
+        True label of the test features
+
+    classifiers: list
+        List of tuples (data scaler, classifier)
+
+    path: str
+        Path to save the models
+
+    models_name: str
+        Name to add to the saved files
+
+    dimension_reduction : function
+        Function to use for reducing dimensions. Default is None
+
+    Returns
+    ------
+    File 
+        h5 and joblib files. Saved trained models
+    """
+
     models = []
 
     for scaler, clf in tqdm(classifiers):
@@ -188,10 +171,10 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
                 model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
             # Training the model  
-            model.fit(X_train, y_train) 
+            fit = model.fit(X_train, y_train) 
             
             # Saving into a list
-            models.append((name,model))
+            models.append((name,fit))
 
     # Saving into a pickle file
     with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
@@ -200,6 +183,30 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
     print('Models saved') 
 
 def evaluate(X_test, y_test, models, train=False):
+    """Get predictions and scores for multiple sklearn binary classification 
+    algorithms and a tensorflow sequential model.
+
+    Parameters
+    ----------
+
+    X_test : DataFrame
+        Features for testing
+
+    y_test: Series
+        True label of the test features
+
+    models : list
+        List of tuples (name, trained classifier)
+
+    train : bool
+        If the model was trained in the current run. Defaul is False
+
+    Returns
+    ------
+    clfs :  list
+        List of classifier objects
+    """
+    
    # To save the output
     clfs = []
     
@@ -276,7 +283,8 @@ def main():
     # If the out path does not exists, creates it
     if not os.path.exists(PATH_OUT):
         os.makedirs(PATH_OUT)
-
+    
+    
     print('BUILDING FEATURES')
 
     if RD:
@@ -313,9 +321,9 @@ def main():
         build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
                     path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
 
-
+    
     print('PREPARING THE DATA')
-
+    
     df = pd.read_csv(os.path.join(PATH_RAW, '{}.csv'.format(filename)))
 
     if TRAINING or RD:
@@ -323,13 +331,13 @@ def main():
         X, y = separate_data(df, standarize=False)
         # Dropping the mass to make the classification model-fre
         X.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
-        # Splitting in training and testis sets
+        # Splitting in training and testing sets
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1, stratify=y)
 
     else:  
         # Separating characteristics from label
         X_test, y_test = separate_data(df, standarize=False)
-        # Dropping the mass to make the classification model-fre
+        # Dropping the mass to make the classification model-free
         X_test.drop(['m_j1', 'm_j2', 'm_jj'], axis=1, inplace=True)
 
     if TRAINING:
@@ -342,13 +350,14 @@ def main():
                         (StandardScaler(), KMeans(n_clusters=2, random_state=15))
                         ]
 
-
+        
         print('TRAINING ALGORITHMS')
-
+        
         training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
 
+    
     print('GETTING PREDICTIONS AND SCORES')
-
+   
     # Sklearn algorithms
     models = []
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
@@ -374,6 +383,8 @@ def main():
 
     # Adding algorithms trained and evaluated externaly
     if PATH_EXT_CLF != None:
+
+        
         print('LOADING DATA FROM EXTERNAL ALGORITHMS')
 
         # Reading the list of files
@@ -387,6 +398,7 @@ def main():
             scores.append(clf.score)
             preds.append(clf.pred)
             labels.append(clf.label)
+
 
     print('COMPARING METRICS')
 
@@ -415,11 +427,11 @@ def main():
     plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
     plt.clf()
 
-    # Metrics
+    # Numeric metrics
     log = compare_metrics(names, scores, preds, labels)
 
     # Printing values to text
-    with open(os.path.join(PATH_OUT,'metrics.txt'), "a") as f:
+    with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME)), "w") as f:
         print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
 
     # Getting the name of the metrics
