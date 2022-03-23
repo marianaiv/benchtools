@@ -253,23 +253,13 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
    
     # Sklearn algorithms
-    models = []
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
-        while True:
-            try:
-                models.append(pickle.load(f))
-            except EOFError:
-                break
-
-    # Tensorflow algorithm
-    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
-    models.append(('TensorflowClassifier', tf_model))
+        model = pickle.load(f)
 
     # Evaluation
-    clf = evaluate(X_test, y_test, models,train=TRAINING)
+    clf = evaluate(X_test, y_test, model)
 
     print('COMPARING METRICS')
-
     # Plotting metrics
     # Legend size
     
