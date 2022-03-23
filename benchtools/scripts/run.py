@@ -365,7 +365,7 @@ def main():
     models.append(('TensorflowClassifier', tf_model))
 
     # Sklearn algorithms
-    with open(os.path.join(path,"sklearn_models_{}.pckl".format(NAME_MODELS)), "rb") as f:
+    with open(os.path.join(PATH_RAW,"sklearn_models_{}.pckl".format(NAME_MODELS)), "rb") as f:
         while True:
             try:
                 models.append(pickle.load(f))
