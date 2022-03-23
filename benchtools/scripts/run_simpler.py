@@ -48,10 +48,11 @@ from tensorflow.keras.models import Model
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
-from benchtools.src.metrictools import classifier, performance_metrics
+from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
+     precision_recall_plot, compare_metrics, compare_metrics_plot, classifier, performance_metrics
 
 
-def training(X_train, y_train, classifier, name_models, dimension_reduction=None):
+def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
     """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
 
     Parameters
@@ -86,29 +87,32 @@ def training(X_train, y_train, classifier, name_models, dimension_reduction=None
         h5 and joblib files. Saved trained models
     """
 
-    #for scaler, clf in tqdm(classifiers):
-    scaler = classifier[0]
-    clf = classifier[1]
+    models = []
 
-    name = clf.__class__.__name__
-    
-    # Simple pipeline
-    if dimension_reduction is None:
-        model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
-    else:
-        model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
-
-    # Training the model  
-    model.fit(X_train, y_train) 
-
-    model_tuple = (name,model)
+    for scaler, clf in tqdm(classifiers):
         
-    # Saving into a pickle file
-    with open("sklearn_models_{}.pckl".format(name_models), "wb") as f:
-        pickle.dump(model_tuple, f)
-    print('Model saved') 
+        name = clf.__class__.__name__
+        
+        # For the sklearn algoritms
+        # Simple pipeline
+        if dimension_reduction is None:
+            model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
+        else:
+            model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
 
-def evaluate(X_test, y_test, model):
+        # Training the model  
+        fit = model.fit(X_train, y_train) 
+        
+        # Saving into a list
+        models.append((name,fit))
+
+    # Saving into a pickle file
+    with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
+        for model in models:
+            pickle.dump(model, f)
+    print('Models saved') 
+
+def evaluate(X_test, y_test, models):
     """Get predictions and scores for multiple sklearn binary classification 
     algorithms and a tensorflow sequential model.
 
@@ -133,18 +137,20 @@ def evaluate(X_test, y_test, model):
         List of classifier objects
     """
     
+   # To save the output
+    clfs = []
     
-    #for name, model in tqdm(models):
+    for name, model in tqdm(models):
 
-    # Getting the prediction
-    y_pred = model[1].predict(X_test)
-    
-    # Probability or distances
-    y_score = model[1].predict_proba(X_test)
+        # Getting the prediction
+        y_pred = model.predict(X_test)
+        
+        # Probability or distances
+        y_score = model.predict_proba(X_test)
 
-    one_classifier = classifier(model[0], y_score[:,1], y_pred, y_test)
-    
-    return one_classifier
+        clfs.append(classifier(name, y_score[:,1], y_pred, y_test))
+
+    return clfs
 
 
 def main():   
@@ -243,46 +249,61 @@ def main():
 
     if TRAINING:
         # Scalers and classifiers
-        classifier = (StandardScaler(), RandomForestClassifier(random_state=1))
+        classifiers = [(StandardScaler(), RandomForestClassifier(random_state=1)),
+                        (RobustScaler(), GradientBoostingClassifier(random_state=4)),
+                        ]
+
         
         print('TRAINING ALGORITHMS')
         
-        training(X_train, y_train, classifier, NAME_MODELS)
+        training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
 
     
     print('GETTING PREDICTIONS AND SCORES')
    
     # Sklearn algorithms
+    models = []
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
-        model = pickle.load(f)
+        while True:
+            try:
+                models.append(pickle.load(f))
+            except EOFError:
+                break
 
     # Evaluation
-    clf = evaluate(X_test, y_test, model)
+    clfs = evaluate(X_test, y_test, models)
+
+    # Getting the values to plot
+
+    names = [clf.name for clf in clfs]
+    scores = [clf.score for clf in clfs]
+    preds = [clf.pred for clf in clfs]      
+    labels = [clf.label.to_numpy() for clf in clfs] 
 
     print('COMPARING METRICS')
-    # Plotting metrics
-    # Legend size
-    
-    plt.rc('legend',fontsize='x-small')
 
-    clf.rejection()
-    plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
-    plt.clf()
+    print('Classifiers to compare:')
+    for name in names:
+        print(name)
 
-    clf.inverse_roc()
-    plt.savefig(os.path.join(PATH_OUT,'inverse_roc.png'), bbox_inches='tight')
-    plt.clf()
-
-    clf.significance()
-    plt.savefig(os.path.join(PATH_OUT,'significance.png'), bbox_inches='tight')
-    plt.clf()
-
-    clf.precision_recall()
-    plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
-    plt.clf()
-
+    for clf in clfs:
+        performance_metrics(clf.name, clf.label, clf.pred, clf.score)
     # Numeric metrics
-    performance_metrics(clf.name, clf.label, clf.pred, clf.score)
+    log = compare_metrics(names, scores, preds, labels)
+
+    # Printing values to text
+    with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME)), "w") as f:
+        print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
+
+    # Getting the name of the metrics
+    metrics = log.columns.tolist()
+
+    # Plotting the metrics
+    color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
+    for metric,color in zip(metrics,color_list):
+        compare_metrics_plot(log, metric, color=color)
+        plt.savefig(os.path.join(PATH_OUT,'{}_barh.png'.format(metric)), bbox_inches='tight')
+        plt.clf()
 
 if __name__ == "__main__":
     main()
