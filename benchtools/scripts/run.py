@@ -177,7 +177,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             models.append((name,fit))
 
     # Saving into a pickle file
-    with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
+    with open(os.path.join(path,"sklearn_models_{}.pckl".format(models_name)), "wb") as f:
         for model in models:
             pickle.dump(model, f)
     print('Models saved') 
@@ -359,12 +359,13 @@ def main():
     print('GETTING PREDICTIONS AND SCORES')
    
     models = []
+
     # Tensorflow algorithm
     tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
     models.append(('TensorflowClassifier', tf_model))
 
     # Sklearn algorithms
-    with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
+    with open(os.path.join(path,"sklearn_models_{}.pckl".format(NAME_MODELS)), "rb") as f:
         while True:
             try:
                 models.append(pickle.load(f))
