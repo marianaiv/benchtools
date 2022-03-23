@@ -51,6 +51,51 @@ from benchtools.src.datatools import separate_data
 from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
      precision_recall_plot, compare_metrics, compare_metrics_plot, classifier, performance_metrics
 
+def TensorflowClassifier(input_shape):
+    """Returns a simple sequential model for binary classification.
+
+    Parameters
+    ----------
+    input_shape : int
+        Number of initial features
+
+    Returns
+    ------
+    model: 
+        Tensorflow sequential model
+    """
+
+    # Creating the model
+    # Here are the layers with batch normalization, the drop out rate and the activations
+    
+    model = keras.Sequential([
+    layers.BatchNormalization(input_shape=input_shape),
+    layers.Dense(512, activation='relu'),
+    layers.BatchNormalization(),
+    layers.Dropout(0.3),
+    layers.Dense(512, activation='relu'),   
+    layers.BatchNormalization(),
+    layers.Dropout(0.3),
+    layers.Dense(512, activation='relu'),   
+    layers.BatchNormalization(),
+    layers.Dropout(0.3),
+    layers.Dense(512, activation='relu'),   
+    layers.BatchNormalization(),
+    layers.Dropout(0.3),
+    layers.Dense(512, activation='relu'),   
+    layers.BatchNormalization(),
+    layers.Dropout(0.3),
+    layers.Dense(1, activation='sigmoid'),
+    ])
+
+    # Choosing the optimizer
+    # Binary crossentropy for binary classification
+    model.compile(
+        optimizer='adam',
+        loss='binary_crossentropy',
+        metrics=['binary_accuracy'],)
+    
+    return model
 
 def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
     """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
@@ -93,18 +138,43 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
         
         name = clf.__class__.__name__
         
-        # For the sklearn algoritms
-        # Simple pipeline
-        if dimension_reduction is None:
-            model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
-        else:
-            model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
+        # For tensorflow the training is different
+        if name == 'Sequential' :
+            # Scaling the data
+            X_train[X_train.columns] = scaler.fit_transform(X_train[X_train.columns])
+            X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
+            # Getting model
+            model = clf
+            model.summary()
+            # We use early stop to prevent the model from overfitting
+            early_stopping = keras.callbacks.EarlyStopping(
+                patience=20,
+                min_delta=0.001,
+                restore_best_weights=True,
+            )
+            # Training the model
+            model.fit(
+            X_train, y_train,
+            validation_data=(X_test, y_test),
+            batch_size=512,
+            epochs=200,
+            callbacks=[early_stopping])
+            
+            model.save(os.path.join(path,'tf_model_{}.h5'.format(models_name)))
 
-        # Training the model  
-        fit = model.fit(X_train, y_train) 
-        
-        # Saving into a list
-        models.append((name,fit))
+        # For the sklearn algoritms
+        else:
+            # Simple pipeline
+            if dimension_reduction is None:
+                model = Pipeline(steps=[('ss', scaler), ('clf', clf)])
+            else:
+                model = Pipeline(steps=[('ss', scaler), ('dr', dimension_reduction), ('clf', clf)])
+
+            # Training the model  
+            fit = model.fit(X_train, y_train) 
+            
+            # Saving into a list
+            models.append((name,fit))
 
     # Saving into a pickle file
     with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
@@ -112,7 +182,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             pickle.dump(model, f)
     print('Models saved') 
 
-def evaluate(X_test, y_test, models):
+def evaluate(X_test, y_test, models, train=False):
     """Get predictions and scores for multiple sklearn binary classification 
     algorithms and a tensorflow sequential model.
 
@@ -142,16 +212,38 @@ def evaluate(X_test, y_test, models):
     
     for name, model in tqdm(models):
 
-        # Getting the prediction
-        y_pred = model.predict(X_test)
+        if name != 'TensorflowClassifier':
+            # Getting the prediction
+            y_pred = model.predict(X_test)
+            
+            # Probability or distances
+            try: 
+                y_score = model.predict_proba(X_test)
+
+                clfs.append(classifier(name, y_score[:,1], y_pred, y_test))
+            except: 
+                # KMeans doesn't have a probability, so here we get 
+                # the distances to each cluster
+                y_score = model.transform(X_test)
+                # The score for KMeans is defined differently
+                norm = np.linalg.norm(y_score[:,1])
+                clfs.append(classifier(name, 1-y_score[:,1]/norm, y_pred, y_test))
         
-        # Probability or distances
-        y_score = model.predict_proba(X_test)
+        # For tensorflow the prediction is different
+        else:
+            # If there is no training the data won't be scalated
+            # So we add it here
+            if train is False: 
+                scaler = MinMaxScaler(feature_range=(-1,1))
+                X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
 
-        clfs.append(classifier(name, y_score[:,1], y_pred, y_test))
-
+            y_score = model.predict(X_test)
+            # Getting the threshold to make class predictions (0 or 1)
+            threshold = optimal_threshold(y_test, y_score)
+            y_pred = (model.predict(X_test) > threshold).astype("int32")
+            clfs.append(classifier(name, y_score, y_pred, y_test))
+    
     return clfs
-
 
 def main():   
     tf.random.set_seed(125)
@@ -249,7 +341,8 @@ def main():
 
     if TRAINING:
         # Scalers and classifiers
-        classifiers = [(StandardScaler(), RandomForestClassifier(random_state=1)),
+        classifiers = [(MinMaxScaler(feature_range=(-1,1)), TensorflowClassifier(input_shape = [X_train.shape[1]])),
+                        (StandardScaler(), RandomForestClassifier(random_state=1)),
                         (RobustScaler(), GradientBoostingClassifier(random_state=4)),
                         ]
 
@@ -263,13 +356,18 @@ def main():
    
     # Sklearn algorithms
     models = []
+    
+    # Tensorflow algorithm
+    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
+    models.append(('TensorflowClassifier', tf_model))
+
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
         while True:
             try:
                 models.append(pickle.load(f))
             except EOFError:
                 break
-
+    
     # Evaluation
     clfs = evaluate(X_test, y_test, models)
 
