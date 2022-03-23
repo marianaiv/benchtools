@@ -259,7 +259,7 @@ def main():
     parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
     parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
     parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
-    parser.add_argument('--nevents', type=int, default=100000, help='Number batches [default: 100,000]. If all_data is True, then this flag has no effect')
+    parser.add_argument('--nevents', type=int, default=100000, help='Number of events to use [default: 100,000]. If all_data is True, then this flag has no effect')
     parser.add_argument('--all_data', default=False, action='store_true', help='Use the complete dataset [default: False]')
     parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms [default: False]')
 
@@ -358,18 +358,18 @@ def main():
     
     print('GETTING PREDICTIONS AND SCORES')
    
-    # Sklearn algorithms
     models = []
+    # Tensorflow algorithm
+    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
+    models.append(('TensorflowClassifier', tf_model))
+
+    # Sklearn algorithms
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
         while True:
             try:
                 models.append(pickle.load(f))
             except EOFError:
                 break
-
-    # Tensorflow algorithm
-    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
-    models.append(('TensorflowClassifier', tf_model))
 
     # Evaluation
     clfs = evaluate(X_test, y_test, models,train=TRAINING)
