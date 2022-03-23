@@ -288,6 +288,27 @@ def main():
 
     for clf in clfs:
         performance_metrics(clf.name, clf.label, clf.pred, clf.score)
+    
+    # Plotting metrics
+    # Legend size
+    plt.rc('legend',fontsize='x-small')
+
+    rejection_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'rejection.png'), bbox_inches='tight')
+    plt.clf()
+
+    inverse_roc_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'inverse_roc.png'), bbox_inches='tight')
+    plt.clf()
+
+    significance_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'significance.png'), bbox_inches='tight')
+    plt.clf()
+
+    precision_recall_plot(names=names, labels=labels, probs=scores)
+    plt.savefig(os.path.join(PATH_OUT,'precision-recall.png'), bbox_inches='tight')
+    plt.clf()
+
     # Numeric metrics
     log = compare_metrics(names, scores, preds, labels)
 
