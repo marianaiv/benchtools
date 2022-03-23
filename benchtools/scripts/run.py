@@ -177,7 +177,7 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             models.append((name,fit))
 
     # Saving into a pickle file
-    with open("sklearn_models_{}.pckl".format(models_name), "wb") as f:
+    with open(os.path.join(path,"sklearn_models_{}.pckl".format(models_name)), "wb") as f:
         for model in models:
             pickle.dump(model, f)
     print('Models saved') 
@@ -360,7 +360,7 @@ def main():
    
     # Sklearn algorithms
     models = []
-    with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
+    with open(os.path.join(path,"sklearn_models_{}.pckl".format(NAME_MODELS)), "rb") as f:
         while True:
             try:
                 models.append(pickle.load(f))
