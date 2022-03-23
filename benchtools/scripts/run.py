@@ -358,6 +358,10 @@ def main():
     
     print('GETTING PREDICTIONS AND SCORES')
    
+    # Tensorflow algorithm
+    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
+    models.append(('TensorflowClassifier', tf_model))
+    
     # Sklearn algorithms
     models = []
     with open("sklearn_models_{}.pckl".format(NAME_MODELS), "rb") as f:
@@ -366,10 +370,6 @@ def main():
                 models.append(pickle.load(f))
             except EOFError:
                 break
-
-    # Tensorflow algorithm
-    tf_model = load_model(os.path.join(PATH_RAW,'tf_model_{}.h5'.format(NAME_MODELS)))
-    models.append(('TensorflowClassifier', tf_model))
 
     # Evaluation
     clfs = evaluate(X_test, y_test, models,train=TRAINING)
