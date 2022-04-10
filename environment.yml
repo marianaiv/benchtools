@@ -25,7 +25,6 @@ dependencies:
   - pip:
     - absl-py==1.0.0
     - astunparse==1.6.3
-    - benchtools==0.0.1
     - cachetools==5.0.0
     - charset-normalizer==2.0.12
     - cycler==0.11.0
