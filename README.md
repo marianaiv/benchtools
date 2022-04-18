@@ -59,6 +59,10 @@ As the idea is to use it to compare models, some simple models are trained and u
     - Plotting: signal efficiency vs. background rejection, inverse ROC, significance improvement, precision-recall
 - **Output**: Folder with .png for all the plots and a .txt of a table with the calculated variables.
 
+Here is a flowchart of the process described above,
+
+<img src="figures/pipeline_flowchart.png"/>
+
 ## Development and testing <a name="testing"></a>
 
 `Benchtools` uses the [pytest](https://pypi.org/project/pytest/) library for automated functional testing of code 
