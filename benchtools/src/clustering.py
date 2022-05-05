@@ -23,7 +23,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
         Size of the radius for the clustering (default is 1)
 
     p : int
-        Algorithm to use for the clustering (default is -1 or kt)
+        Algorithm to use for the clustering (default is -1 or anti-kt)
     
     minpt : int
         Minimum pT of the jets on the list (default is 20)
