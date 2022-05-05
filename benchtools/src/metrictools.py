@@ -541,14 +541,12 @@ def compare_metrics(names, scores, preds, labels):
         precision = precision_score(label, pred)
         f1 = f1_score(label, pred)
         recall = recall_score(label, pred)
-        ll = log_loss(label, score)
 
         # Inserting into a dictionary
-        log_dict[name]=[ba, precision, f1, recall, ll]
+        log_dict[name]=[ba, precision, f1, recall]
     
     # Converting it to a dataframe
-    columns_name = {0:'Balanced accuracy', 1:'Precision', 2:'F1 score', 3: 'Recall',
-              4:'Log loss'}
+    columns_name = {0:'Balanced accuracy', 1:'Precision', 2:'F1 score', 3: 'Recall'}
     log = pd.DataFrame.from_dict(log_dict, orient='index').rename(columns=columns_name)
     log.index.name = 'Classifier'
     
@@ -606,8 +604,6 @@ class classifier:
         Returns the f1 score of the classification
     balanced_accuracy()
         Returns the balanced accuracy of the classification
-    log_loss()
-        Returns the logarithmic loss of the classification
     roc()
         Returns the ROC plot of the classification
     rejection()
@@ -650,9 +646,6 @@ class classifier:
 
     def balanced_accuracy(self):
         return balanced_accuracy_score(self.label, self.pred)
-
-    def log_loss(self):
-        return log_loss(self.label, self.score)
         
     # Methods for getting each plot   
     def roc(self):
