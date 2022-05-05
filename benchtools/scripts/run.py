@@ -257,8 +257,9 @@ def main():
     parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
     parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
     parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
+    parser.add_argument('--file',  type=str, default=None, help='Path to pre-processed file to use in training and classification. Using this skips pre-processing')
     parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
-    parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False')
+    parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False]')
     parser.add_argument('--nevents', type=int, default=100000, help='Number of events to use [default: 100,000]. If all_data is True, then this flag has no effect')
     parser.add_argument('--all_data', default=False, action='store_true', help='Use the complete dataset [default: False]')
     parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms [default: False]')
@@ -271,6 +272,7 @@ def main():
     PATH_EXT_CLF = flags.ext_clf
     OUT_NAME = flags.name
     NAME_MODELS = flags.models
+    FILE = flags.file
     RD = flags.RD
     N_EVENTS = flags.nevents
     ALL_DATA = flags.all_data
@@ -284,47 +286,52 @@ def main():
     if not os.path.exists(PATH_OUT):
         os.makedirs(PATH_OUT)
     
+    if (FILE is None):
+        print('BUILDING FEATURES')
+
+        if RD:
+            # Getting the size for each chunk
+            if ALL_DATA:
+                N_EVENTS = 1100000
     
-    print('BUILDING FEATURES')
+            chunksize = ceil(N_EVENTS/N_BATCH)
 
-    if RD:
-        # Getting the size for each chunk
-        if ALL_DATA:
-            N_EVENTS = 1100000
-   
-        chunksize = ceil(N_EVENTS/N_BATCH)
+            # Building the features
+            sample = 'events_anomalydetection.h5'
+            path_sample = os.path.join(PATH_RAW,sample)
+            filename = 'features_RD_{}'.format(N_EVENTS)
 
-        # Building the features
-        sample = 'events_anomalydetection.h5'
-        path_sample = os.path.join(PATH_RAW,sample)
-        filename = 'features_RD_{}'.format(N_EVENTS)
+            print('Building features from the R&D dataset')
+            build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
+                        path_label=None, outdir=PATH_RAW, chunksize=chunksize)
 
-        print('Building features from the R&D dataset')
-        build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                    path_label=None, outdir=PATH_RAW, chunksize=chunksize)
+        else:
+            # Getting the size for each chunk
+            if ALL_DATA:
+                N_EVENTS = 1000000 
 
-    else:
-        # Getting the size for each chunk
-        if ALL_DATA:
-            N_EVENTS = 1000000 
+            chunksize = ceil(N_EVENTS/N_BATCH)
 
-        chunksize = ceil(N_EVENTS/N_BATCH)
+            # Building the features
+            sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
+            label = 'events_LHCO2020_BlackBox{}.masterkey'.format(flags.box)
+            path_sample = os.path.join(PATH_RAW,sample)
+            path_label= os.path.join(PATH_RAW,label)
+            filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
 
-        # Building the features
-        sample = 'events_LHCO2020_BlackBox{}.h5'.format(flags.box)
-        label = 'events_LHCO2020_BlackBox{}.masterkey'.format(flags.box)
-        path_sample = os.path.join(PATH_RAW,sample)
-        path_label= os.path.join(PATH_RAW,label)
-        filename = 'features_BB{}_{}'.format(flags.box,N_EVENTS)
+            print('Building features from the BB{} dataset'.format(flags.box))
+            build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
+                        path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
 
-        print('Building features from the BB{} dataset'.format(flags.box))
-        build_features(path_data=path_sample, nbatch=N_BATCH, outname=filename, 
-                    path_label=path_label, outdir=PATH_RAW, chunksize=chunksize)
-
+    else: 
+        pass
     
     print('PREPARING THE DATA')
     
-    df = pd.read_csv(os.path.join(PATH_RAW, '{}.csv'.format(filename)))
+    if FILE is None:
+        df = pd.read_csv(os.path.join(PATH_RAW, '{}.csv'.format(filename)))
+    else:
+        df = pd.read_csv(FILE)
 
     if TRAINING or RD:
         # Separating characteristics from label
