@@ -1,4 +1,5 @@
 import os
+from tokenize import Triple
 from PIL import Image
 import matplotlib.pyplot as plt
 
@@ -208,12 +209,16 @@ def create_png(namedf, df, variables, keyname, path, nbins=50, type='distributio
         fig = plt.figure(facecolor='white')
         if type == 'distribution':
             bkg_sig_hist(df, variable=variable, label='label', n_bins=nbins)
-            # Title (in spanish but can be changed)
-            plt.title('{}: distribución de {}'.format(namedf, variable))
+            if title is True:
+                # Title (in spanish but can be changed)
+                plt.title('{}: distribución de {}'.format(namedf, variable))
             # Defining path and name of the files
             filename = os.path.join(path,'{}-{}-{}.png'.format(keyname,namedf,variable))
         if type == 'scatter':
-            bkg_sig_scatter(df, variable[0], variable[1], title='{}: correlación entre {} y {}'.format(namedf,variable[0], variable[1]))
+            if title is True:
+                bkg_sig_scatter(df, variable[0], variable[1], title='{}: correlación entre {} y {}'.format(namedf,variable[0], variable[1]))
+            else:
+                bkg_sig_scatter(df, variable[0], variable[1])
             # Defining path and name of the files
             filename = os.path.join(path,'{}-{}-{}v{}.png'.format(keyname,namedf,variable[0], variable[1]))
         # Saving the path of each file
