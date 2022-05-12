@@ -1,3 +1,5 @@
+import os
+from PIL import Image
 import matplotlib.pyplot as plt
 
 def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bins=50):
@@ -120,7 +122,7 @@ def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=
     variable  : Pandas Serie
         Variable from the DataFrame to plot
 
-    n_bins : Pandas Serie
+    n_bins : int
         Number of bins (default is 50)
 
     log : bool
@@ -165,3 +167,125 @@ def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=
     plt.title(title)
     
     return ax
+
+def create_png(namedf, df, variables, keyname, path, nbins=50, type='distribution', title=False):
+    '''Creates multiple .png images using bkg_sig_hist or bkg_sig_scatter.
+
+    Parameters
+    ----------
+    namedf : str
+        Name for the dataframe
+    
+    df  : DataFrame
+        DataFrame with the features for each event
+
+    variables : list
+        List of features or list of tuples
+
+    keyname : str
+        Key for all the images names
+
+    path : str
+        Path to save the images
+
+    nbins : int
+        Number of bins for distribution plot (default is 50)
+
+    type : str
+        'distribution' to use bkg_sig_hist or 'scatter' to use bkg_sig_scatter (default is 'distribution')
+    
+    title : bool
+        True for using the titles in spanish (default is False)
+
+    Returns
+    ------
+    list_images : list 
+        List for the path of the images
+    '''
+    list_images= []
+    for variable in variables:
+        # Plotting
+        fig = plt.figure(facecolor='white')
+        if type == 'distribution':
+            bkg_sig_hist(df, variable=variable, label='label', n_bins=nbins)
+            # Title (in spanish but can be changed)
+            plt.title('{}: distribución de {}'.format(namedf, variable))
+            # Defining path and name of the files
+            filename = os.path.join(path,'{}-{}-{}.png'.format(keyname,namedf,variable))
+        if type == 'scatter':
+            bkg_sig_scatter(df, variable[0], variable[1], title='{}: correlación entre {} y {}'.format(namedf,variable[0], variable[1]))
+            # Defining path and name of the files
+            filename = os.path.join(path,'{}-{}-{}v{}.png'.format(keyname,namedf,variable[0], variable[1]))
+        # Saving the path of each file
+        list_images.append(filename)
+        # Saving the figure as a png
+        plt.savefig(filename, bbox_inches='tight', facecolor=fig.get_facecolor(),edgecolor='none')
+        plt.close()
+    return list_images
+
+def image_grid(rows, columns, images, name, path, remove=False):
+    '''Grid row x columns of png images as a png file.
+
+    Parameters
+    ----------
+    rows : int
+        Number of rows
+
+    columns : int
+        Number of columns
+
+    images : list
+        List with the paths of the images
+
+    name : str
+        Name to save the png
+
+    path : str
+        Path to save the image
+
+    remove : bool
+        True if the list of images should be removed after creating the grid (default is False)
+
+    Returns
+    ------
+    None
+    '''
+    # Getting sizes of the images
+    width = []
+    height = []
+    for image in images:
+        img = Image.open(image)
+        w, h = img.size
+        width.append(w)
+        height.append(h)
+
+    # And max dimensions
+    wmax = max(width)
+    hmax = max(height)
+
+    new_image = Image.new('RGB', (columns*wmax, rows*hmax), color = 'white')
+    
+    # If the number of images is odd create a white one and add it to the list
+    if len(images) % 2 != 0:
+        img = Image.new("RGB", (wmax, hmax), (255, 255, 255))
+
+        img.save(os.path.join(path,'whiteimage.png'), "PNG")
+        images.append('./../../figuras/whiteimage.png')
+    
+    # Create the grid
+    ii = 0
+    for row in range(rows):
+        for column in range(columns):
+            img = Image.open(images[ii])
+            new_image.paste(img, (column*wmax, row*hmax))
+            ii+=1
+
+    # Save it
+    new_image.save(os.path.join(path, 'figuras/{}.png'.format(name)))
+
+    # Deleting the images from the list
+    if remove is True:
+        for img in images: 
+            os.remove(img)
+        
+    return None
