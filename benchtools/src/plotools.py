@@ -270,7 +270,7 @@ def image_grid(rows, columns, images, name, path, remove=False):
         img = Image.new("RGB", (wmax, hmax), (255, 255, 255))
 
         img.save(os.path.join(path,'whiteimage.png'), "PNG")
-        images.append('./../../figuras/whiteimage.png')
+        images.append(os.path.join(path,'whiteimage.png'))
     
     # Create the grid
     ii = 0
@@ -281,7 +281,7 @@ def image_grid(rows, columns, images, name, path, remove=False):
             ii+=1
 
     # Save it
-    new_image.save(os.path.join(path, 'figuras/{}.png'.format(name)))
+    new_image.save(os.path.join(path,'{}.png'.format(name)))
 
     # Deleting the images from the list
     if remove is True:
