@@ -48,7 +48,7 @@ from tensorflow.keras.models import Model
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
-from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, \
+from benchtools.src.metrictools import optimal_threshold, roc_curve_and_score, rejection_plot, inverse_roc_plot, significance_plot, \
      precision_recall_plot, compare_metrics, compare_metrics_plot, classifier
 
 def TensorflowClassifier(input_shape):
@@ -227,7 +227,17 @@ def evaluate(X_test, y_test, models, train=False):
                 y_score = model.transform(X_test)
                 # The score for KMeans is defined differently
                 norm = np.linalg.norm(y_score[:,1])
-                clfs.append(classifier(name, 1-y_score[:,1]/norm, y_pred, y_test))
+                # The label of the predictions in KMeans aren't necessarily the labels used
+                # since KMeans just groups and assign a label to each group. Here we assign zero
+                # to the most recurring label
+                n_zeros = np.count_nonzero(y_pred==0)
+                n_ones = np.count_nonzero(y_pred==1)
+                if n_zeros < n_ones:
+                    y_pred = np.where((y_pred==0)|(y_pred==1), y_pred^1, y_pred)
+                    y_proba = y_score[:,1]/norm
+                else: y_proba = 1-y_score[:,1]/norm
+
+                clfs.append(classifier(name, y_proba, y_pred, y_test))
         
         # For tensorflow the prediction is different
         else:
@@ -413,7 +423,6 @@ def main():
     print('Classifiers to compare:')
     for name in names:
         print(name)
-
 
     # Plotting metrics
     # Legend size
