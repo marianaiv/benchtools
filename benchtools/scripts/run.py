@@ -97,22 +97,16 @@ def TensorflowClassifier(input_shape):
     
     return model
 
-def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, dimension_reduction=None):
+def training(X_train, y_train, classifiers, path, models_name, dimension_reduction=None):
     """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
 
     Parameters
     ----------
     X_train : DataFrame
         Features for training
-    
-    X_test : DataFrame
-        Features for testing
 
     y_train : Series
         True label of the train features
-
-    y_test: Series
-        True label of the test features
 
     classifiers: list
         List of tuples (data scaler, classifier)
@@ -140,9 +134,11 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
         
         # For tensorflow the training is different
         if name == 'Sequential' :
+            # Getting %5 for validation
+            X_train_tf, X_val_tf, y_train_tf, y_val_tf = train_test_split(X_train, y_train, test_size=0.05, random_state=1, stratify=y_train)
             # Scaling the data
-            X_train[X_train.columns] = scaler.fit_transform(X_train[X_train.columns])
-            X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
+            X_train_tf[X_train_tf.columns] = scaler.fit_transform(X_train_tf[X_train_tf.columns])
+            X_val_tf[X_val_tf.columns] = scaler.fit_transform(X_val_tf[X_val_tf.columns])
             # Getting model
             model = clf
             model.summary()
@@ -154,8 +150,8 @@ def training(X_train, X_test, y_train, y_test, classifiers, path, models_name, d
             )
             # Training the model
             model.fit(
-            X_train, y_train,
-            validation_data=(X_test, y_test),
+            X_train_tf, y_train_tf,
+            validation_data=(X_val_tf, y_val_tf),
             batch_size=512,
             epochs=200,
             callbacks=[early_stopping])
@@ -241,16 +237,15 @@ def evaluate(X_test, y_test, models, train=False):
         
         # For tensorflow the prediction is different
         else:
-            # If there is no training the data won't be scalated
-            # So we add it here
-            if train is False: 
-                scaler = MinMaxScaler(feature_range=(-1,1))
-                X_test[X_test.columns] = scaler.fit_transform(X_test[X_test.columns])
+            # Scaling the data
+            scaler = MinMaxScaler(feature_range=(-1,1))
+            X_test_copy = X_test.copy()
+            X_test_copy[X_test_copy.columns] = scaler.fit_transform(X_test_copy[X_test_copy.columns])
 
-            y_score = model.predict(X_test)
+            y_score = model.predict(X_test_copy)
             # Getting the threshold to make class predictions (0 or 1)
             threshold = optimal_threshold(y_test, y_score)
-            y_pred = (model.predict(X_test) > threshold).astype("int32")
+            y_pred = (model.predict(X_test_copy) > threshold).astype("int32")
             clfs.append(classifier(name, y_score, y_pred, y_test))
     
     return clfs
@@ -370,7 +365,7 @@ def main():
         
         print('TRAINING ALGORITHMS')
         
-        training(X_train, X_test, y_train, y_test, classifiers, PATH_RAW, NAME_MODELS)
+        training(X_train, y_train, classifiers, PATH_RAW, NAME_MODELS)
 
     
     print('GETTING PREDICTIONS AND SCORES')
