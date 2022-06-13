@@ -23,8 +23,10 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     
     ylabel : str
         Label for the y-axis (default is Events density)
+
     n_bins : int
         Number of bins for the plots
+
     Returns
     ------
     ax : 
@@ -42,7 +44,13 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     # Plotting the histogramas
         df_plot = df.loc[df.loc[:,label]==integer]
         df_plot = df_plot[variable]
-        df_plot.plot.hist(bins=n_bins, facecolor=color, alpha=0.2, label='label {}'.format(integer), density=True)
+        if len(labels)==2:
+            if integer == 0:
+                df_plot.plot.hist(bins=n_bins, facecolor=color, alpha=0.2, label='background'.format(integer), density=True)
+            else:
+                df_plot.plot.hist(bins=n_bins, facecolor=color, alpha=0.2, label='signal'.format(integer), density=True)
+        else:
+            df_plot.plot.hist(bins=n_bins, facecolor=color, alpha=0.2, label='label {}'.format(integer), density=True)
     
     # Adding information to the plot
     if xlabel != None:
