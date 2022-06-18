@@ -9,7 +9,7 @@ from benchtools.src.datatools import read_multifiles, generator, ascii_column, s
 
 
 def test_read_multifiles():
-    
+  
     #build_features(path_data="../data/events_anomalydetection_tiny.h5",nbatch=2, outname='test_file', chunksize=100)
     
     # test lenght:
