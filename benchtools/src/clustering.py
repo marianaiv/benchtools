@@ -1,10 +1,12 @@
+import os
+import pandas as pd
+import numpy as np
+from tqdm import tqdm  # Progress bar
 from numpy.core.records import fromstring
 import pyjet as fj
 from benchtools.src.substructure import deltaR, tau21, invariantmass
-from benchtools.src.datatools import generator, save_df, ascii_column
-import pandas as pd
-import numpy as np
-from tqdm import tqdm                                                      # Progress bar
+from benchtools.src.datatools import generator, save_df, ascii_column, merge_files, delete_multifiles
+                                                    
 
 def jets(event, R = 1.0, p = -1, minpt=20): 
     """Returns a list of jets given an event.
@@ -21,7 +23,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
         Size of the radius for the clustering (default is 1)
 
     p : int
-        Algorithm to use for the clustering (default os -1 or kt)
+        Algorithm to use for the clustering (default is -1 or anti-kt)
     
     minpt : int
         Minimum pT of the jets on the list (default is 20)
@@ -53,7 +55,7 @@ def jets(event, R = 1.0, p = -1, minpt=20):
         pass
 
     ## Returns a "ClusterSequence" (pyjets type of list)
-    secuencia = fj.cluster(pseudojets_input, R = 1.0, p = -1) 
+    secuencia = fj.cluster(pseudojets_input, R = R, p = p) 
 
     ## With inclusive_jets we access all the jets that were clustered
     ## and we filter those with pT greater than 20.
@@ -188,36 +190,48 @@ def build_features(path_data, nbatch, outname, path_label=None, outdir='../data'
         E and tau for the two principal jets, deltaR, mjj and number of 
         hadrons for a chuncksize of the events.
     """
-    # Creating the object to generate the dataframe
-    fb = generator(path_data,chunksize)
+    # Checking if the file hasn't been created before
+    filename=os.path.join(outdir,outname+'.csv').replace("\\","/")
+    if os.path.exists(filename):
+        print("A file with that name already exists")
+    # If not, continue with the creation of the file
+    else:    
+        # Creating the object to generate the dataframe
+        fb = generator(path_data,chunksize)
 
-    # Initiating the counter
-    batch_idx = 0
+        # Initiating the counter
+        batch_idx = 0
 
-    for batch in fb:
-        # A DataFrame to store the features 
-        df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrons_j1',
-                                'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrons_j2',
-                                'm_jj', 'deltaR_j12','n_hadrons', 'label'])
-        
-        # Checking the number of batch
-        if batch_idx < nbatch:
-            print('Part {}/{}'.format(batch_idx+1, nbatch))
-        elif batch_idx == nbatch:
-            print('Done')
-            break
+        for batch in fb:
+            # A DataFrame to store the features 
+            df = pd.DataFrame(columns=['pT_j1', 'm_j1', 'eta_j1', 'phi_j1', 'E_j1', 'tau_21_j1', 'nhadrons_j1',
+                                    'pT_j2', 'm_j2', 'eta_j2', 'phi_j2', 'E_j2', 'tau_21_j2', 'nhadrons_j2',
+                                    'm_jj', 'deltaR_j12','n_hadrons', 'label'])
             
-        data = batch
+            # Checking the number of batch
+            if batch_idx < nbatch:
+                print('Part {}/{}'.format(batch_idx+1, nbatch))
+            elif batch_idx == nbatch:
+                print('Done')
+                break
+                
+            data = batch
 
-        # Getting the label column if we are not using the RD DataFrame
-        if path_label != None:
-            label = ascii_column(path_label)
-            data = pd.concat([data, label.iloc[data.index]], axis=1)
+            # Getting the label column if we are not using the RD DataFrame
+            if path_label != None:
+                label = ascii_column(path_label)
+                data = pd.concat([data, label.iloc[data.index]], axis=1)
 
-        df = cluster_events(data)
-        
-        # Saving the DataFrame as csv for every batch  
-        savename = "".join((outname,'_{}')).format(batch_idx)
-        save_df(savename, outdir, df)
-        
-        batch_idx += 1 
+            df = cluster_events(data)
+            
+            # Saving the DataFrame as csv for every batch  
+            savename = "".join((outname,'_{}')).format(batch_idx)
+            save_df(savename, outdir, df)
+            
+            batch_idx += 1 
+        # Merging in one file 
+        print('Merging files')
+        merge_files(outname, nbatch, outdir=outdir)
+
+        # Deleting the multiple files
+        delete_multifiles(outname, nbatch, outdir=outdir)
