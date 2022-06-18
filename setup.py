@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="benchtools",
-    version="0.0.1",
+    version="1.0.0",
     author="Mariana Vivas",
     description="A benchmarking tool for ML classification algorithms",
     long_description=long_description,
