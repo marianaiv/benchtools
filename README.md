@@ -114,9 +114,7 @@ To run the pipeline is necessary to download the files and save them in the *dat
 - [Black Boxes and labels](https://zenodo.org/record/4536624)
 ## Output for `benchtools`
 The output are .png files comparing the models with numeric and bidimensional metris for binary classification, and a .txt file with values for numeric metrics. Especifically: balanced accuracy, precision, recall and f1 score, and inverse ROC curve, signal efficiency vs. background rejection, precisio-recall curve, and significance improvement curve.
-
-<img src="figures/comp-metricas-num-RnD.png"/>
-
+### .txt file
 | Classifier                    |   Balanced accuracy |   Precision |   Recall |   F1 score |
 |:-----------------------------:|:-------------------:|:-----------:|:--------:|:----------:|
 | TensorflowClassifier          |            0.9076   |   0.5033    | 0.9044   |  0.6467    |
@@ -128,7 +126,10 @@ The output are .png files comparing the models with numeric and bidimensional me
 | GAN-AE                        |            0.7950   |   0.3962    | 0.8431   |  0.5391    |
 | UCluster                      |            0.8073   |   0.0308    | 0.8921   |  0.0595    |
 
+### Numeric metrics
+<img src="figures/comp-metricas-num-RnD.png"/>
 
+### Bidimensional metrics
 <img src="figures/comp-metricas-graf-RnD.png"/>
 
 This result was obtained using the R&D dataset, running the following command:
