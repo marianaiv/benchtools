@@ -1,4 +1,4 @@
-<h1 align="center"> :sparkles: Benchtools :sparkles: </h1>
+<h1 align="center"> :sparkles: benchtools :sparkles: </h1>
 
 > Repository of the tools developed for the [final degree project](https://github.com/marianaiv/tesis_grado_UCV) of Mariana Vivas.   
 
@@ -8,13 +8,13 @@
 
 - [About the project](#about_project)
 - [About the repository](#about_repo)
-- [The `Benchtools` package](#benchtools)
+- [The `benchtools` package](#benchtools)
 - [Development and testing](#testing)
 - [License](#license)
 
 # About the project <a name="about_project"></a>
 
-The tools developed in the `Benchtools` package are for a project that aims to study **machine learning techniques for the search of new physics in dijets events by the development of tools to assert the performance of different approximations**. These approximations include algorithms from package like sklearn and simple tensorflow models, to more complex algorithms like [UCluster](https://github.com/ViniciusMikuni/UCluster) and [GAN-AE](https://github.com/lovaslin/GAN-AE_LHCOlympics), which participated in the [LHC Olympics 2020](lhco2020.github.io/homepage/). 
+The tools developed in the `benchtools` package are for a project that aims to study **machine learning techniques for the search of new physics in dijets events by the development of tools to assert the performance of different approximations**. These approximations include algorithms from package like sklearn and simple tensorflow models, to more complex algorithms like [UCluster](https://github.com/ViniciusMikuni/UCluster) and [GAN-AE](https://github.com/lovaslin/GAN-AE_LHCOlympics), which participated in the [LHC Olympics 2020](lhco2020.github.io/homepage/). 
 
 The project itself is in Spanish and more information about it and the results obtained can be found in this [link](https://github.com/marianaiv/tesis_grado_UCV).
 
@@ -40,15 +40,15 @@ The content of this repository is organized as follows:
 
 More information about the content of each file can be found on the README file on each folder.
 
-# The `Benchtools` package <a name="benchtools"></a>
+# The `benchtools` package <a name="benchtools"></a>
 > A Python package for benchmarking binary classification algorithms 
 ## Workflow
-`Benchtools` works with input data of dijet events as the one published for the [LHC Olympics 2020](lhco2020.github.io/homepage/):
+`benchtools` works with input data of dijet events as the one published for the [LHC Olympics 2020](lhco2020.github.io/homepage/):
 > [The data has] the following event selection: at least one anti-kT R = 1.0 jet with pseudorapidity |η| < 2.5 and transverse momentum pT > 1.2 TeV.   For each event, we provide a list of all hadrons (pT, η, φ, pT, η, φ, …) zero-padded up to 700 hadrons.
 
 As the idea is to use it to compare models, some simple models are trained and used to get predictions in the pipeline. However, a .txt can be passed to the pipeline with a list of files that contains a classifier object with the true labes, scores, and predictions given by any external classifier. 
 
-`Benchtools` process the data, train some models and compares them with externaly inserted ones using performance metrics. The pipeline follows these steps (figure below):
+`benchtools` process the data, train some models and compares them with externaly inserted ones using performance metrics. The pipeline follows these steps (figure below):
 - **Input**: .h5 file with raw data (or .csv with pre-processed data) and .txt with a list of files, each with a classifier object.
 - **Steps**
 1. Pre-process the data by clustering the jets and calculating pT, m, η, φ, E, 𝜏12, n_hadrons for the two principal jets and mjj, ΔR12, and n_hadrons for the event.
@@ -140,7 +140,7 @@ benchtools_run --ext_clf ext-RnD.txt --RD --all_data --training
 ```
 # Development and testing <a name="testing"></a>
 
-`Benchtools` uses the [pytest](https://pypi.org/project/pytest/) library for automated functional testing of code 
+`benchtools` uses the [pytest](https://pypi.org/project/pytest/) library for automated functional testing of code 
 development and integration. These [tests](tests) are run from the project directory using the command:
 
 ```
