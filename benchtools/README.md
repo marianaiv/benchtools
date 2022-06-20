@@ -1,6 +1,6 @@
-# Benchtools
+# `benchtools` code
 
-This is the README for the code of the *benchtools* package. For the README of the main repository follow [this link](https://github.com/marianaiv/benchmark_clalgoritmos/blob/main/README.md).
+This is the README for the code of the `benchtools` package. For the README of the main repository follow [this link](https://github.com/marianaiv/benchmark_clalgoritmos/blob/main/README.md).
 
 This file is constructed as follows:
 
@@ -9,11 +9,11 @@ This file is constructed as follows:
 
 ## src
 The `src` folder has the following modules:
-- *clustering*: functions to cluster jets using pyjet.
-- *datatools*: functions to manage big datasets and data related to the LHCO 2020.
-- *metrictools*: functions to calculate performance metrics for binary classification algorithms.
-- *plotools*: functions to plot the pre-processed data separating background from signal: distributions, correlations, etc.
-- *substructure*: functions to calculate substructure variables from jets.
+- `clustering`: functions to cluster jets using pyjet.
+- `datatools`: functions to manage big datasets and data related to the LHCO 2020.
+- `metrictools`: functions to calculate performance metrics for binary classification algorithms.
+- `plotools`: functions to plot the pre-processed data separating background from signal: distributions, correlations, etc.
+- `substructure`: functions to calculate substructure variables from jets.
 ## scripts
 The `scripts` folders contains the following:
 ### Run.py (pipeline)
