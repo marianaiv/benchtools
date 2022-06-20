@@ -33,8 +33,10 @@ Some of the tools that can be found here are for:
 ## Content of the repository <a name="content"></a>
 The content of this repository is organized as follows:
 * :computer: [benchtools](benchtools): Package with the tools described above, scripts to transform data and a pipeline to compare binary classification algorithms.
+* :bar_chart: [data](data): Data to use with the pipeline, in the notebooks, and in the tests.
+* :camera: [figures](figures): Figures for this ReadMe file.
 * :books: [notebooks](notebooks): Jupyter Notebooks with data exploration and analysis, use of different ML algorithms and anything related to the development of the benchtools package. In these notebooks are examples of how the functions of the package can be used.
-* :bar_chart: [tests](tests): Code for testing the functions and the pipeline in the benchtools package.
+* :wrench: [tests](tests): Code for testing the functions and the pipeline in the benchtools package.
 
 More information about the content of each file can be found on the README file on each folder.
 
@@ -64,18 +66,18 @@ Here is a flowchart of the process described above,
 <img src="figures/pipeline_flowchart.png"/>
 
 ## Installation
-The `benchtools` package requires Python 3.7 or greater. First, create a virtual enviroment using conda from the eviroment file and activate it.
+The `benchtools` package requires Python 3.7 or greater. First, clone the repository.
 ```
-conda env create -f environment.yml
-conda activate benchtools
-```
-Then, clone the repository.
-```
-git clone https://github.com/marianaiv/benchtools.git
+git clone https://github.com/marianaiv/GAN-AE_LHCOlympics.git
 ```
 Enter the repository.
 ```
-cd benchtools
+cd GAN-AE_LHCOlympics
+```
+Then, create a virtual enviroment from the eviroment file using conda and activate it.
+```
+conda env create -f environment.yml
+conda activate benchtools
 ```
 Install `benchtools`.
 ```
@@ -141,8 +143,9 @@ benchtools_run --ext_clf ext-RnD.txt --RD --all_data --training
 `Benchtools` uses the [pytest](https://pypi.org/project/pytest/) library for automated functional testing of code 
 development and integration. These [tests](tests) are run from the project directory using the command:
 
-`pytest -s `
-
+```
+pytest -s 
+```
 # License <a name="license"></a>
 
 This software is licensed under the terms of the [GNU General Public License v3.0 (GNU GPLv3)](https://choosealicense.com/licenses/gpl-3.0/).
