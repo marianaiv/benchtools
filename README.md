@@ -16,7 +16,7 @@
 
 The tools developed in the `benchtools` package are for a project that aims to study **machine learning techniques for the search of new physics in dijets events by the development of tools to assert the performance of different approximations**. These approximations include algorithms from package like sklearn and simple tensorflow models, to more complex algorithms like [UCluster](https://github.com/ViniciusMikuni/UCluster) and [GAN-AE](https://github.com/lovaslin/GAN-AE_LHCOlympics), which participated in the [LHC Olympics 2020](lhco2020.github.io/homepage/). 
 
-The project itself is in Spanish and more information about it and the results obtained can be found in this [link](https://github.com/marianaiv/tesis_grado_UCV).
+The project itself is in Spanish and more information about it, and the results obtained, can be found in this [link](https://github.com/marianaiv/tesis_grado_UCV).
 
 # About the repository <a name="about_repo"></a>
 
