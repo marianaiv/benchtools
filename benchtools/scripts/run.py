@@ -1,12 +1,10 @@
 ### Getting the data ###
 '''
 The data used in this project can be donwloaded from zenodo:
-
 R&D dataset
 https://zenodo.org/record/2629073#.XjOiE2PQhEa
     Direct link:
     https://zenodo.org/record/2629073/files/events_anomalydetection.h5?download=1
-
 Black Box:
 https://zenodo.org/record/4536624
     Direct links: 
@@ -53,12 +51,10 @@ from benchtools.src.metrictools import optimal_threshold, roc_curve_and_score, r
 
 def TensorflowClassifier(input_shape):
     """Returns a simple sequential model for binary classification.
-
     Parameters
     ----------
     input_shape : int
         Number of initial features
-
     Returns
     ------
     model: 
@@ -99,27 +95,20 @@ def TensorflowClassifier(input_shape):
 
 def training(X_train, y_train, classifiers, path, models_name, dimension_reduction=None):
     """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
-
     Parameters
     ----------
     X_train : DataFrame
         Features for training
-
     y_train : Series
         True label of the train features
-
     classifiers: list
         List of tuples (data scaler, classifier)
-
     path: str
         Path to save the models
-
     models_name: str
         Name to add to the saved files
-
     dimension_reduction : function
         Function to use for reducing dimensions. Default is None
-
     Returns
     ------
     File 
@@ -181,22 +170,16 @@ def training(X_train, y_train, classifiers, path, models_name, dimension_reducti
 def evaluate(X_test, y_test, models, train=False):
     """Get predictions and scores for multiple sklearn binary classification 
     algorithms and a tensorflow sequential model.
-
     Parameters
     ----------
-
     X_test : DataFrame
         Features for testing
-
     y_test: Series
         True label of the test features
-
     models : list
         List of tuples (name, trained classifier)
-
     train : bool
         If the model was trained in the current run. Defaul is False
-
     Returns
     ------
     clfs :  list
@@ -252,22 +235,20 @@ def evaluate(X_test, y_test, models, train=False):
 
 
 def main():   
-    tf.random.set_seed(125)
-
     # DEFAULT SETTINGS
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Run benchtools benchmarking pipeline")
     parser.add_argument('--dir', type=str, default='../../data/', help='Folder containing the input files [Default: ../../data]')
     parser.add_argument('--out', type=str, default='../../logs/', help='Folder to save output files [Default: ../../logs]')
-    parser.add_argument('--ext_clf', type=str, default=None, help='Path for the txt with the list of external classifiers to compare. The files in the list have to be in --dir if added [Default: None]')
-    parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
     parser.add_argument('--name', type=str, default='log', help='Name of the output folder. The folder is created in --out [Default: log]')
-    parser.add_argument('--models', type=str, default='log', help='Name to save the models [Default: log]')
-    parser.add_argument('--file',  type=str, default=None, help='Path to pre-processed file to use in training and classification. Using this skips pre-processing')
+    parser.add_argument('--models', type=str, default='log', help='Name to save the models and models to use [Default: log]')
+    parser.add_argument('--ext_clf', type=str, default=None, help='Path for the .txt with the list of external classifiers to compare. The files in the list have to be in --dir if added [Default: None]')
     parser.add_argument('--box', type=int, default=1, help='Black Box number, ignored if RD dataset [default: 1]')
     parser.add_argument('--RD',  default=False, action='store_true' ,help='Use RD data set [default: False]')
-    parser.add_argument('--nevents', type=int, default=100000, help='Number of events to use [default: 100,000]. If all_data is True, then this flag has no effect')
+    parser.add_argument('--file',  type=str, default=None, help='Path to pre-processed file to use in training and classification')
+    parser.add_argument('--nevents', type=int, default=100000, help='Number of events to use. If all_data is True, then this flag has no effect [default: 100,000]')
+    parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
     parser.add_argument('--all_data', default=False, action='store_true', help='Use the complete dataset [default: False]')
-    parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms [default: False]')
+    parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms. If the models have not been trained before, is needed for the scripts to run [default: False]')
 
 
     flags = parser.parse_args()
@@ -365,6 +346,10 @@ def main():
         
         print('TRAINING ALGORITHMS')
         
+        # Setting random seed 
+        tf.random.set_seed(125)
+
+        # Training 
         training(X_train, y_train, classifiers, PATH_RAW, NAME_MODELS)
 
     
