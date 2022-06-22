@@ -19,11 +19,6 @@ setuptools.setup(
     packages=["benchtools"
             , "benchtools.src"
            , "benchtools.scripts"
-    ],
-    
-    entry_points={"console_scripts": [
-        "benchtools_run=benchtools.scripts.run:main"
-
-        ]},
+]
 
 )
