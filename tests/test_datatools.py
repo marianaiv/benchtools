@@ -2,19 +2,24 @@
 Test datatools
 """
 import pandas as pd
+import numpy as np
 import os
 
 from benchtools.src.clustering import build_features
-from benchtools.src.datatools import read_multifiles, generator, ascii_column, separate_data, save_df
+from benchtools.src.datatools import read_multifiles, ascii_column, separate_data, save_df
 
 
 def test_read_multifiles():
   
+    # Files created for testing with the commented code below
     #build_features(path_data="data/events_anomalydetection_tiny.h5",nbatch=2, outname='test_file', chunksize=100)
+    #df_random = pd.DataFrame(np.random.randint(0,10,size=(10, 4)), columns=list('ABCD'))
+    #df_random.to_csv('data/test_multifiles_0.csv',index=False)
+    #df_random.to_csv('data/test_multifiles_1.csv',index=False)
     
     # test lenght:
-    df = pd.read_csv('data/test_file.csv')
-    assert df.shape[0]==100*2
+    df = read_multifiles('test_multifiles', nbatch=2, outdir = 'data')
+    assert df.shape[0]==10*2
 
     # check for duplicated indexes
     assert df.index.duplicated().all()==False
@@ -26,7 +31,7 @@ def test_ascii_column():
     # checking the length
     assert df.shape == (40,1)
     # checking that it only has 0 and 1
-    df[2100].isin([0,1]).all() == True
+    assert df[2100].isin([0,1]).all() == True
 
 def test_separate_data():
     df = pd.read_csv('data/test_file.csv')
