@@ -54,8 +54,7 @@ def tau21(jet,subR=0.2):
     ------
     float
         Value for tau21
-    """
-    jet_substruct_features = {}        
+    """       
     seq = fj.cluster(jet, R=subR, algo='kt')
     cnsts = jet.constituents()
     cndts1 = seq.exclusive_jets(1)

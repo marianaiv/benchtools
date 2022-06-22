@@ -1,10 +1,12 @@
 ### Getting the data ###
 '''
 The data used in this project can be donwloaded from zenodo:
+
 R&D dataset
 https://zenodo.org/record/2629073#.XjOiE2PQhEa
     Direct link:
     https://zenodo.org/record/2629073/files/events_anomalydetection.h5?download=1
+
 Black Box:
 https://zenodo.org/record/4536624
     Direct links: 
@@ -51,10 +53,12 @@ from benchtools.src.metrictools import optimal_threshold, roc_curve_and_score, r
 
 def TensorflowClassifier(input_shape):
     """Returns a simple sequential model for binary classification.
+
     Parameters
     ----------
     input_shape : int
         Number of initial features
+
     Returns
     ------
     model: 
@@ -95,20 +99,27 @@ def TensorflowClassifier(input_shape):
 
 def training(X_train, y_train, classifiers, path, models_name, dimension_reduction=None):
     """Trains multiple sklearn binary classification algorithms and a tensorflow sequential model.
+
     Parameters
     ----------
     X_train : DataFrame
         Features for training
+
     y_train : Series
         True label of the train features
+
     classifiers: list
         List of tuples (data scaler, classifier)
+
     path: str
         Path to save the models
+
     models_name: str
         Name to add to the saved files
+
     dimension_reduction : function
         Function to use for reducing dimensions. Default is None
+
     Returns
     ------
     File 
@@ -170,16 +181,22 @@ def training(X_train, y_train, classifiers, path, models_name, dimension_reducti
 def evaluate(X_test, y_test, models, train=False):
     """Get predictions and scores for multiple sklearn binary classification 
     algorithms and a tensorflow sequential model.
+
     Parameters
     ----------
+
     X_test : DataFrame
         Features for testing
+
     y_test: Series
         True label of the test features
+
     models : list
         List of tuples (name, trained classifier)
+
     train : bool
         If the model was trained in the current run. Defaul is False
+
     Returns
     ------
     clfs :  list
