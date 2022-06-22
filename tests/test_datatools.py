@@ -10,7 +10,6 @@ from benchtools.src.datatools import read_multifiles, ascii_column, separate_dat
 
 
 def test_read_multifiles():
-  
     # Files created for testing with the commented code below
     #build_features(path_data="data/events_anomalydetection_tiny.h5",nbatch=2, outname='test_file', chunksize=100)
     #df_random = pd.DataFrame(np.random.randint(0,10,size=(10, 4)), columns=list('ABCD'))
