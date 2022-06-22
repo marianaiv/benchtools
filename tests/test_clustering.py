@@ -1,10 +1,12 @@
 """
 Test clustering
+
+Disclaimer: I tried to make the test independant of other functions but I wasn't able to save a jet object. Since the tests depends
+on others, one test may be failing because one of the functions that it depends upon is failing.
 """
 import pandas as pd
 import os
 from benchtools.src.clustering import jets, event_features, cluster_events, build_features
-from benchtools.src.datatools import save_df
 
 def test_jets():
     event = pd.read_hdf("data/events_anomalydetection_tiny.h5", stop=1)
