@@ -118,7 +118,7 @@ def roc_plot(names, labels, probs, colors=LIST_COLORS):
                 plt.plot(fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
-    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification')
+    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random classification AUC=0.500')
 
     # Adding information to the plot
     plt.legend(loc="lower right")
@@ -190,7 +190,7 @@ def rejection_plot(names, labels, probs, colors=LIST_COLORS):
                 plt.plot(1-fpr, tpr, color=color, lw=2, label='{} AUC={:.3f}'.format(name, roc_auc))
 
     # Plotting the line for a random classifier
-    plt.plot(1-tpr, tpr, color='navy', lw=1, linestyle='--', label='Random classification')
+    plt.plot(1-tpr, tpr, color='navy', lw=1, linestyle='--', label='Random classification AUC=0.500')
 
     # Adding information to the plot
     plt.legend(loc="lower left")
@@ -423,7 +423,7 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
         _, counts = np.unique(labels, return_counts=True)
         ratio = counts[1]/counts[0]
         # Plotting the line for a random classifier
-        plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification')
+        plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
 
     # Multiple curves
     else:
@@ -433,6 +433,12 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
                 for name, label, prob, color in zip(names, labels, probs, colors):
                     precision, recall, ap_score = pr_curve_and_score(label, prob)
                     plt.plot(recall, precision, color=color, lw=2, label='{} AP={:.3f}'.format(name,ap_score))
+                
+                # Calculating the ratio of signal
+                _, counts = np.unique(labels[1], return_counts=True)
+                ratio = counts[1]/counts[0]
+                # Plotting the line for a random classifier
+                plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
 
         # Same labels
         else:
@@ -444,7 +450,7 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
             _, counts = np.unique(labels, return_counts=True)
             ratio = counts[1]/counts[0]
             # Plotting the line for a random classifier
-            plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification')
+            plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
     
     # Adding information to the plot
     plt.legend(loc="lower right")
@@ -507,7 +513,7 @@ def performance_metrics(name, label, pred_label, pred_prob=None):
 
     return log_entry
 
-def compare_metrics(names, scores, preds, labels):
+def compare_metrics(names, preds, labels):
     '''Calculates the balanced accuracy, precision, f1 score, recall 
     and logaritmic loss for multiple classifiers.
 
@@ -515,9 +521,6 @@ def compare_metrics(names, scores, preds, labels):
     ----------
     names: list
         List of the names of the classifiers
-    
-    scores: list
-        List of the probabilities or scores of each classifier
     
     preds: list
         List of the predictions of each classifier
@@ -534,7 +537,7 @@ def compare_metrics(names, scores, preds, labels):
 
     log_dict = {}
     
-    for name, score, pred, label in zip(names, scores, preds, labels):
+    for name, pred, label in zip(names, preds, labels):
 
         # Calculating metrics
         ba = balanced_accuracy_score(label, pred)
