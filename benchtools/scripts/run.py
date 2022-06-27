@@ -29,6 +29,7 @@ from joblib import dump, load
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 
 # Importing the classifiers
@@ -48,8 +49,7 @@ from tensorflow.keras.models import Model
 # Benchtools
 from benchtools.src.clustering import build_features
 from benchtools.src.datatools import separate_data
-from benchtools.src.metrictools import optimal_threshold, roc_curve_and_score, rejection_plot, inverse_roc_plot, significance_plot, \
-     precision_recall_plot, compare_metrics, compare_metrics_plot, classifier
+from benchtools.src.metrictools import optimal_threshold, rejection_plot, inverse_roc_plot, significance_plot, precision_recall_plot, compare_metrics, compare_metrics_plot, classifier
 
 def TensorflowClassifier(input_shape):
     """Returns a simple sequential model for binary classification.
@@ -265,7 +265,7 @@ def main():
     parser.add_argument('--nevents', type=int, default=100000, help='Number of events to use. If all_data is True, then this flag has no effect [default: 100,000]')
     parser.add_argument('--nbatch', type=int, default=10, help='Number batches [default: 10]')
     parser.add_argument('--all_data', default=False, action='store_true', help='Use the complete dataset [default: False]')
-    parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms. If the models have not been trained before, is needed for the scripts to run [default: False]')
+    parser.add_argument('--training', default=False, action='store_true', help='To train the algorithms. If the models have not been trained before this flag is needed for the scripts to run [default: False]')
 
 
     flags = parser.parse_args()
@@ -399,8 +399,14 @@ def main():
     # Adding algorithms trained and evaluated externaly
     if PATH_EXT_CLF != None:
 
-        
         print('LOADING DATA FROM EXTERNAL ALGORITHMS')
+
+        # Class to unpickle the classifiers
+        class MyCustomUnpickler(pickle.Unpickler):
+            def find_class(self, module, name):
+                if module == "__main__":
+                    module = "benchtools.src.metrictools"
+                return super().find_class(module, name)
 
         # Reading the list of files
         with open('{}'.format(PATH_EXT_CLF)) as f:
@@ -408,12 +414,13 @@ def main():
         
         # Adding the information to the existing lists
         for file in external_clfs:
-            clf = pickle.load(open(os.path.join(PATH_RAW,file), 'rb'))
-            names.append(clf.name)
-            scores.append(clf.score)
-            preds.append(clf.pred)
-            labels.append(clf.label)
-
+            with open(os.path.join(PATH_RAW,file), 'rb') as f:
+                unpickler = MyCustomUnpickler(f)
+                clf = unpickler.load()
+                names.append(clf.name)
+                scores.append(clf.score)
+                preds.append(clf.pred)
+                labels.append(clf.label)
 
     print('COMPARING METRICS')
 
@@ -442,11 +449,21 @@ def main():
     plt.clf()
 
     # Numeric metrics
-    log = compare_metrics(names, scores, preds, labels)
+    # Creating random classifier
+    n_labels = len(labels[0])
+    zeros = np.zeros(int(n_labels/2))
+    ones = np.ones(int(n_labels/2))
+    random_pred = shuffle(np.append(zeros,ones), random_state=0)
+    # Adding random classifier to the list
+    names.append('Random classification')
+    preds.append(random_pred)
+    labels.append(labels[0])
+
+    log = compare_metrics(names, preds, labels)
 
     # Printing values to text
     with open(os.path.join(PATH_OUT,'metrics_{}.txt'.format(OUT_NAME)), "w") as f:
-        print(tabulate(log, headers='keys', tablefmt='psql'), file=f)
+        print(tabulate(log, headers='keys', tablefmt='psql', floatfmt=".4f"), file=f)
 
     # Getting the name of the metrics
     metrics = log.columns.tolist()

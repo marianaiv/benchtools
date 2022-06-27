@@ -127,6 +127,7 @@ The output are .png files comparing the models with numeric and bidimensional me
 | KMeans                        |            0.7934   |   0.2551    | 0.8288   |  0.3901    |
 | GAN-AE                        |            0.7950   |   0.3962    | 0.8431   |  0.5391    |
 | UCluster                      |            0.8073   |   0.0308    | 0.8921   |  0.0595    |
+| Random classification         |            0.4991   |   0.0906    | 0.1534   |  0.4984    |
 
 ### Numeric metrics
 <img src="figures/comp-metricas-num-RnD.png"/>
@@ -136,7 +137,7 @@ The output are .png files comparing the models with numeric and bidimensional me
 
 This result was obtained using the R&D dataset, running the following command:
 ```
-benchtools_run --ext_clf ext-RnD.txt --RD --all_data --training
+benchtools_run --ext_clf data/ext-RnD.txt --RD --all_data --training
 ```
 # Development and testing <a name="testing"></a>
 
