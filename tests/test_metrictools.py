@@ -52,7 +52,7 @@ def test_performance_metrics():
 def test_compare_metrics():
     # importing classifier
     clf = pd.read_csv('data/test_metrics.csv')
-    df = compare_metrics(['clf'], [clf['score']], [clf['pred']], [clf['label']])
+    df = compare_metrics(['clf'], [clf['pred']], [clf['label']])
     # asserting each value
     assert df.loc['clf','Balanced accuracy'] == 0.7949953678193595
     assert df.loc['clf','Precision'] == 0.3962095800668954
@@ -60,7 +60,7 @@ def test_compare_metrics():
     assert df.loc['clf','Recall'] == 0.8430767356387191
 
     # checking if the classifier just guess zeros
-    df = compare_metrics(['clf'], [clf['score']], [np.zeros(len(clf['label']))], [clf['label']])
+    df = compare_metrics(['clf'], [np.zeros(len(clf['label']))], [clf['label']])
     # asserting each value
     assert df.loc['clf','Balanced accuracy'] == 0.5
     assert df.loc['clf','Precision'] == 0.0
@@ -68,7 +68,7 @@ def test_compare_metrics():
     assert df.loc['clf','Recall'] == 0.0
 
     # checking a perfect classification
-    df = compare_metrics(['clf'], [clf['score']], [clf['label']], [clf['label']])
+    df = compare_metrics(['clf'], [clf['label']], [clf['label']])
     # asserting each value
     assert df.loc['clf','Balanced accuracy'] == 1.0
     assert df.loc['clf','Precision'] == 1.0

@@ -421,7 +421,7 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
 
         # Calculating the ratio of signal
         _, counts = np.unique(labels, return_counts=True)
-        ratio = counts[1]/counts[0]
+        ratio = counts[1]/(counts[0]+counts[1])
         # Plotting the line for a random classifier
         plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
 
@@ -436,7 +436,7 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
                 
                 # Calculating the ratio of signal
                 _, counts = np.unique(labels[1], return_counts=True)
-                ratio = counts[1]/counts[0]
+                ratio = counts[1]/(counts[0]+counts[1])
                 # Plotting the line for a random classifier
                 plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
 
@@ -448,7 +448,7 @@ def precision_recall_plot(names, labels, probs, colors=LIST_COLORS):
 
             # Calculating the ratio of signal
             _, counts = np.unique(labels, return_counts=True)
-            ratio = counts[1]/counts[0]
+            ratio = counts[1]/(counts[0]+counts[1])
             # Plotting the line for a random classifier
             plt.axhline(y=ratio, color='navy', lw=1, linestyle='--', label='Random classification AP={:.3f}'.format(ratio))
     
