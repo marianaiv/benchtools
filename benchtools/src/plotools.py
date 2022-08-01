@@ -64,7 +64,7 @@ def bkg_sig_hist(df, variable, label, xlabel=None, ylabel='Events density', n_bi
     
     return ax
 
-def bkg_sig_scatter(df, x, y, label='label', title=None):
+def bkg_sig_scatter(df, x, y, xlabel=None, ylabel=None, label='label', title=None):
     '''Plot two scatter plots on the same figure on different axis, 
     for signal and background.
 
@@ -79,6 +79,12 @@ def bkg_sig_scatter(df, x, y, label='label', title=None):
     y : str
         Name of the variable to plot on the y-axis
     
+    xlabel : str
+        Label for the x-axis (default is None)
+    
+    ylabel : str
+        Label for the y-axis (default is None)
+
     label : str
         Name of the column with the boolean information for signal or background (default is label)
     
@@ -108,18 +114,24 @@ def bkg_sig_scatter(df, x, y, label='label', title=None):
     xbkg = df_bkg[x]
     ybkg= df_bkg[y]
     bkg = ax1.scatter(xbkg, ybkg, c='b', alpha=0.5)
-    ax1.set(ylabel=y)
+    if ylabel != None:
+        ax1.set(ylabel=ylabel)
+    else:
+        ax1.set(ylabel=y)
     #ax1.set_title('bkg')
 
     # Adding information to the plot
     ax2.legend((signal, bkg), ('Signal', 'Background'), loc='upper right', prop={'size': 12})
     fig.suptitle(title)
-    fig.text(0.5, 0.04, x, ha='center', va='center')
+    if xlabel != None:
+        fig.text(0.5, 0.04, xlabel, ha='center', va='center')
+    else:
+        fig.text(0.5, 0.04, x, ha='center', va='center')
     plt.subplots_adjust(wspace=0);
     
     return ax1, ax2
 
-def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=False):
+def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', xlabel=None, ylabel='Events density', n_bins=50, log=False):
     '''Plots the distribution of the test and the prediction on an axis on the same plot, 
     separating signal and background.
 
@@ -130,6 +142,18 @@ def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=
 
     variable  : Pandas Serie
         Variable from the DataFrame to plot
+    
+    ypred  : str
+        Name for the column that contains the predictions
+
+    ytest  : str
+        Name for the column that contains the true labes
+
+    xlabel : str
+        Label for the x-axis (default is None)
+    
+    ylabel : str
+        Label for the y-axis (default is Events density)
 
     n_bins : int
         Number of bins (default is 50)
@@ -170,14 +194,17 @@ def pred_test_hist(df, variable, ypred='y_pred', ytest='y_test', n_bins=50, log=
     sig_test.plot.hist(bins=n_bins, log=log, facecolor='red', alpha=0.2, label='signal', density=True)
 
     # Adding information to the plot
-    plt.xlabel(variable)
-    plt.ylabel('Events density')
+    if xlabel != None:
+        plt.xlabel(xlabel)
+    else:
+        plt.xlabel(variable)
+    plt.ylabel(ylabel)
     plt.legend(loc='upper right')
     plt.title(title)
     
     return ax
 
-def create_png(namedf, df, variables, keyname, path, nbins=50, type='distribution', title=False):
+def create_png(namedf, df, variables, keyname, path, xlabels, ylabels, jet=None , nbins=50, type='distribution', title=False):
     '''Creates multiple .png images using bkg_sig_hist or bkg_sig_scatter.
 
     Parameters
@@ -197,6 +224,15 @@ def create_png(namedf, df, variables, keyname, path, nbins=50, type='distributio
     path : str
         Path to save the images
 
+    xlabels : list
+        List of names for the x-axis
+
+    ylabels : list
+        List of names for the y-axis
+
+    jet: str
+        Principal or secundary jet (default is None)
+
     nbins : int
         Number of bins for distribution plot (default is 50)
 
@@ -212,21 +248,25 @@ def create_png(namedf, df, variables, keyname, path, nbins=50, type='distributio
         List for the path of the images
     '''
     list_images= []
-    for variable in variables:
+    for variable, xlabel, ylabel in zip(variables, xlabels, ylabels):
         # Plotting
         fig = plt.figure(facecolor='white')
         if type == 'distribution':
-            bkg_sig_hist(df, variable=variable, label='label', n_bins=nbins)
+            bkg_sig_hist(df, variable=variable, label='label', xlabel=xlabel, ylabel=ylabel, n_bins=nbins)
             if title is True:
                 # Title (in spanish but can be changed)
-                plt.title('{}: distribución de {}'.format(namedf, variable))
+                if jet != None:
+                    plt.title('{}: distribución de '.format(namedf)+ xlabel+' del '+ jet)
+                else:
+                    plt.title('{}: distribución de '.format(namedf)+ xlabel)
             # Defining path and name of the files
             filename = os.path.join(path,'{}-{}-{}.png'.format(keyname,namedf,variable))
         if type == 'scatter':
             if title is True:
-                bkg_sig_scatter(df, variable[0], variable[1], title='{}: correlación entre {} y {}'.format(namedf,variable[0], variable[1]))
+                bkg_sig_scatter(df, variable[0], variable[1], xlabel=xlabel, ylabel=ylabel, 
+                title='{}: correlación entre '.format(namedf)+xlabel+' y '+ylabel)
             else:
-                bkg_sig_scatter(df, variable[0], variable[1])
+                bkg_sig_scatter(df, variable[0], variable[1], xlabel=xlabel, ylabel=ylabel)
             # Defining path and name of the files
             filename = os.path.join(path,'{}-{}-{}v{}.png'.format(keyname,namedf,variable[0], variable[1]))
         # Saving the path of each file
