@@ -230,6 +230,9 @@ def create_png(namedf, df, variables, keyname, path, xlabels, ylabels, jet=None 
     ylabels : list
         List of names for the y-axis
 
+    jet: str
+        Principal or secundary jet (default is None)
+
     nbins : int
         Number of bins for distribution plot (default is 50)
 
